@@ -1,0 +1,92 @@
+.wrap {
+  padding: 60px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.card {
+  background: rgba(20, 10, 4, 0.7);
+  border: 1px solid rgba(245, 230, 211, 0.1);
+  border-radius: 8px;
+  padding: 40px 36px;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title {
+  font-family: 'Yanone Kaffeesatz', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #f5e6d3;
+  margin: 0;
+}
+
+.subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: rgba(245, 230, 211, 0.4);
+  margin: 0;
+}
+
+.downloadBtn {
+  width: 100%;
+  padding: 14px;
+  background: #c4621a;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-family: 'Yanone Kaffeesatz', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.downloadBtn:hover:not(:disabled) {
+  background: #d4721a;
+  box-shadow: 0 4px 16px rgba(196, 98, 26, 0.3);
+}
+
+.downloadBtn:disabled {
+  background: rgba(196, 98, 26, 0.3);
+  cursor: not-allowed;
+}
+
+.spinner { animation: spin 1s linear infinite; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.empty {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: rgba(245, 230, 211, 0.3);
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .wrap { padding: 32px 16px; }
+  .card { padding: 28px 24px; }
+  .title { font-size: 26px; }
+}
