@@ -1,0 +1,278 @@
+.pendientes {
+  padding: 24px;
+  min-height: 100%;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.desc {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: rgba(245, 230, 211, 0.5);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.desc strong {
+  color: #c4621a;
+  font-weight: 600;
+}
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 20px;
+  background: #c4621a;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-family: 'Yanone Kaffeesatz', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.addBtn:hover { background: #d4721a; }
+
+.empty {
+  text-align: center;
+  padding: 64px 24px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: rgba(245, 230, 211, 0.25);
+}
+
+/* Cards */
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  background: rgba(22, 11, 4, 0.8);
+  border: 1px solid rgba(245, 230, 211, 0.08);
+  border-left: 3px solid #c4621a;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.card:hover {
+  border-color: rgba(245, 230, 211, 0.14);
+  border-left-color: #c4621a;
+}
+
+.cardBody {
+  padding: 16px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardNombre {
+  font-family: 'Yanone Kaffeesatz', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #f5e6d3;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.cardDireccion {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(245, 230, 211, 0.4);
+  margin: 0;
+}
+
+.cardNota {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(245, 230, 211, 0.35);
+  font-style: italic;
+  margin: 4px 0 0;
+  line-height: 1.4;
+}
+
+.cardAcciones {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 14px;
+}
+
+.visitarBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  background: transparent;
+  border: 1px solid rgba(196, 98, 26, 0.4);
+  border-radius: 4px;
+  color: #c4621a;
+  font-family: 'Yanone Kaffeesatz', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.visitarBtn:hover {
+  background: rgba(196, 98, 26, 0.12);
+  border-color: #c4621a;
+}
+
+.editBtn, .deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(245, 230, 211, 0.1);
+  background: rgba(245, 230, 211, 0.04);
+  color: rgba(245, 230, 211, 0.4);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.editBtn:hover {
+  background: rgba(245, 230, 211, 0.1);
+  color: #f5e6d3;
+}
+
+.deleteBtn:hover {
+  background: rgba(220, 60, 60, 0.15);
+  color: rgba(245, 120, 100, 0.8);
+  border-color: rgba(220, 60, 60, 0.2);
+}
+
+/* Modal */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: #1a0e07;
+  border: 1px solid rgba(245, 230, 211, 0.12);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(245, 230, 211, 0.08);
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-family: 'Yanone Kaffeesatz', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #f5e6d3;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: rgba(245, 230, 211, 0.4);
+  cursor: pointer;
+  display: flex;
+  transition: color 0.2s;
+}
+
+.closeBtn:hover { color: #f5e6d3; }
+
+.form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(245, 230, 211, 0.45);
+}
+
+.field input, .field textarea {
+  padding: 11px 14px;
+  background: rgba(245, 230, 211, 0.07);
+  border: 1px solid rgba(245, 230, 211, 0.12);
+  border-radius: 4px;
+  color: #f5e6d3;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.field input:focus, .field textarea:focus {
+  border-color: rgba(196, 98, 26, 0.5);
+}
+
+.field textarea { resize: vertical; }
+
+.opcional {
+  font-weight: 400;
+  color: rgba(245, 230, 211, 0.25);
+}
+
+.submitBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px;
+  background: #c4621a;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-family: 'Yanone Kaffeesatz', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 4px;
+}
+
+.submitBtn:hover { background: #d4721a; }
+
+@media (max-width: 480px) {
+  .pendientes { padding: 16px; }
+}
