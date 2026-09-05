@@ -12,7 +12,7 @@
   --rosa: #F5AFAF;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --tab-bar-h: calc(56px + var(--safe-bottom));
+  --tab-bar-h: calc(68px + var(--safe-bottom));
   --scroll-pad: calc(var(--tab-bar-h) + 46px);
   --fab-bottom: calc(var(--tab-bar-h) + 16px);
 }

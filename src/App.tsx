@@ -95,9 +95,9 @@ function AppContent() {
           <header className={styles.header}>
             <div className={styles.headerRow}>
               <div className={styles.mark}>
-                <Icon name="local_cafe" size={18} color="var(--rosso)" />
+                <img src="/logo-mark.png" alt="" className={styles.markImg} />
               </div>
-              <div className={styles.wordmark}>FLAT<span>WHITE</span></div>
+              <div className={styles.wordmark}>FW<span>Progetto</span></div>
               <button className={styles.menuBtn} onClick={() => setMenuOpen(true)} aria-label="Menú">
                 <span className={styles.menuLine} />
                 <span className={styles.menuLine} />

@@ -26,11 +26,8 @@ export const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 
   return (
     <div className={styles.login}>
-      <img src="/login-bg.png" alt="" className={styles.bg} />
-      <div className={styles.overlay} />
       <div className={`${styles.card} ${shake ? styles.shake : ''}`}>
         <Icon name="lock" size={22} className={styles.lock} />
-        <p className={styles.label}>LA PISTA</p>
         <p className={styles.question}>¿Cuántos Militos hay?</p>
         <form onSubmit={handleSubmit} className={styles.form}>
           <input

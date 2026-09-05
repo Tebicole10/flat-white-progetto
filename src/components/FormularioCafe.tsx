@@ -24,6 +24,11 @@ const FOTO_SUGERENCIAS = 'Sacá: el cartel del lugar, el café con la comida, el
 
 const defaultRatings: Ratings = { cafe: 5, comestibles: 5, vajilla: 5, ambientacion: 5, servicio: 5 };
 
+const fechaCorta = (iso: string): string => {
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y.slice(2)}`;
+};
+
 const parseGoogleMapsUrl = (url: string): { lat: number; lng: number } | null => {
   const dataMatch = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
   if (dataMatch) return { lat: parseFloat(dataMatch[1]), lng: parseFloat(dataMatch[2]) };
@@ -229,7 +234,17 @@ export const FormularioCafe: React.FC<Props> = ({ cafeAEditar, cafeARevisitar, v
                 <div className={styles.row2}>
                   <div className={styles.field}>
                     <label className={styles.fieldLabel}>FECHA</label>
-                    <input className={styles.input} type="date" value={fecha} onChange={e => setFecha(e.target.value)} max={today} />
+                    <div className={styles.dateWrap}>
+                      <div className={styles.dateDisplay}>{fechaCorta(fecha)}</div>
+                      <input
+                        className={styles.dateInput}
+                        type="date"
+                        value={fecha}
+                        onChange={e => setFecha(e.target.value)}
+                        max={today}
+                        aria-label="Fecha de visita"
+                      />
+                    </div>
                   </div>
                   <div className={styles.field}>
                     <label className={styles.fieldLabel}>ÍNDICE FLAT WHITE</label>

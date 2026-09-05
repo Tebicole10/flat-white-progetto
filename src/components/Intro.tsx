@@ -1,4 +1,3 @@
-import { Icon } from './Icon';
 import styles from './Intro.module.css';
 
 interface IntroProps {
@@ -8,13 +7,13 @@ interface IntroProps {
 export const Intro: React.FC<IntroProps> = ({ onPlay }) => {
   return (
     <div className={styles.intro}>
-      <img src="/intro-bg.png" alt="" className={styles.bg} />
+      <img src="/intro-bg.jpg" alt="" className={styles.bg} />
       <div className={styles.gradient} />
       <div className={styles.halo} />
       <div className={styles.content}>
         <div className={styles.hero}>
           <div className={styles.mark}>
-            <Icon name="local_cafe" size={30} color="var(--rosso)" />
+            <img src="/logo-mark.png" alt="" className={styles.markImg} />
           </div>
           <h1 className={styles.title}>
             Progetto<br /><span>Flat White</span>

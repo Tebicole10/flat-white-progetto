@@ -25,9 +25,12 @@ export const Mapa: React.FC<MapaProps> = ({ onVerDetalle }) => {
     if (!containerRef.current) return;
     if (!mapRef.current) {
       mapRef.current = L.map(containerRef.current, { zoomControl: false }).setView([-34.6037, -58.3816], 12);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 18,
+      // ESRI "World Dark Gray Base": estilo oscuro y limpio, gratuito y sin
+      // API key, sin íconos de comercios horneados en el tile (a diferencia
+      // de los tiles default de OSM).
+      L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Esri, HERE, Garmin, FAO, NOAA, USGS',
+        maxZoom: 16,
       }).addTo(mapRef.current);
       // Leaflet no propaga el click de un marker al mapa, así que esto sólo
       // dispara al tocar el fondo vacío del mapa, nunca al tocar un pin.

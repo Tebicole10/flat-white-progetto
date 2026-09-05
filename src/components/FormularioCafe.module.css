@@ -116,6 +116,39 @@
   padding: 0 14px;
 }
 
+/* La fecha no depende del render nativo del input[type=date] (muy
+   inconsistente entre navegadores, sobre todo Safari/iOS) para su tamaño:
+   el input real queda invisible encima, sólo capta el toque y abre el
+   selector nativo; lo que se ve es este div, con el mismo box que .priceInput. */
+.dateWrap {
+  position: relative;
+  height: 50px;
+}
+
+.dateDisplay {
+  height: 50px;
+  border-radius: 12px;
+  background: var(--verde);
+  border: 1.5px solid rgba(249,226,148,.16);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font: 400 15px 'Mukta', sans-serif;
+  color: var(--burro);
+  pointer-events: none;
+}
+
+.dateInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 50px;
+  opacity: 0;
+  border: none;
+  box-sizing: border-box;
+}
+
 .priceInput span { color: rgba(249,226,148,.62); font: 500 15px 'Mukta', sans-serif; }
 
 .priceInput input {
