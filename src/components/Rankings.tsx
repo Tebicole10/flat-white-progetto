@@ -7,17 +7,15 @@ import styles from './Rankings.module.css';
 
 type CategoriaKey = 'total' | 'cafe' | 'comestibles' | 'vajilla' | 'ambientacion' | 'servicio' | 'precio' | 'invitados';
 
-const B = (n: number) => `/cafe-badge-${n}.png`;
-
-const OPCIONES: { key: CategoriaKey; label: string; badge: string }[] = [
-  { key: 'total', label: 'Total', badge: B(1) },
-  { key: 'cafe', label: 'Café', badge: B(4) },
-  { key: 'comestibles', label: 'Delizie', badge: B(2) },
-  { key: 'vajilla', label: 'Vajilla', badge: B(5) },
-  { key: 'ambientacion', label: 'Ambiente', badge: B(3) },
-  { key: 'servicio', label: 'Servicio', badge: B(2) },
-  { key: 'precio', label: 'Índice FW', badge: B(1) },
-  { key: 'invitados', label: 'Compañeros', badge: B(3) },
+const OPCIONES: { key: CategoriaKey; label: string; emoji: string }[] = [
+  { key: 'total', label: 'Total', emoji: '👑' },
+  { key: 'cafe', label: 'Café', emoji: '☕' },
+  { key: 'comestibles', label: 'Delizie', emoji: '🥐' },
+  { key: 'vajilla', label: 'Vajilla', emoji: '🍽️' },
+  { key: 'ambientacion', label: 'Ambiente', emoji: '🎨' },
+  { key: 'servicio', label: 'Servicio', emoji: '👥' },
+  { key: 'precio', label: 'Índice FW', emoji: '💰' },
+  { key: 'invitados', label: 'Compañeros', emoji: '🫂' },
 ];
 
 const HINTS: Record<CategoriaKey, string> = {
@@ -68,7 +66,7 @@ export const Rankings: React.FC = () => {
           return (
             <button key={op.key} className={styles.catBtn} style={{ opacity: activa ? 1 : .6 }} onClick={() => setCategoria(op.key)}>
               <span className={styles.catDisc} style={{ borderColor: activa ? 'var(--rosso)' : 'transparent' }}>
-                <img src={op.badge} alt="" className={styles.catBadgeImg} />
+                <span className={styles.catEmoji}>{op.emoji}</span>
               </span>
               <span className={styles.catLabel} style={{ color: activa ? 'var(--burro)' : 'rgba(249,226,148,.7)' }}>{op.label}</span>
             </button>
