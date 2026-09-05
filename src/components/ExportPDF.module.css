@@ -1,92 +1,172 @@
 .wrap {
-  padding: 60px 24px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 60vh;
-}
-
-.card {
-  background: rgba(20, 10, 4, 0.7);
-  border: 1px solid rgba(245, 230, 211, 0.1);
-  border-radius: 8px;
-  padding: 40px 36px;
-  max-width: 400px;
-  width: 100%;
+  padding: 16px 16px 130px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  text-align: center;
+  gap: 18px;
 }
 
-.cardHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.header { display: flex; align-items: flex-start; justify-content: space-between; }
 
 .title {
-  font-family: 'Yanone Kaffeesatz', sans-serif;
-  font-size: 32px;
-  font-weight: 700;
-  color: #f5e6d3;
+  font: 400 40px/.9 'Anton', sans-serif;
+  text-transform: uppercase;
+  color: var(--burro);
   margin: 0;
 }
 
-.subtitle {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  color: rgba(245, 230, 211, 0.4);
+.cerrar {
+  font: 600 10px 'Mukta', sans-serif;
+  letter-spacing: .14em;
+  color: var(--rosa);
+  cursor: pointer;
+  padding-top: 9px;
+  background: none;
+  border: none;
+}
+
+.bajada {
+  font: 400 14.5px/1.55 'Mukta', sans-serif;
+  color: rgba(249,226,148,.65);
   margin: 0;
+}
+
+.mockRow { display: flex; gap: 12px; align-items: flex-start; }
+
+.mockPortada {
+  width: 132px; height: 190px;
+  border-radius: 3px 12px 12px 3px;
+  background: var(--rosso);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 14px 30px rgba(0,0,0,.4);
+}
+
+.mockDisc {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--burro);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.mockPortadaTitulo {
+  font: 400 22px/.92 'Anton', sans-serif;
+  text-transform: uppercase;
+  color: var(--burro);
+}
+
+.mockEdicion {
+  font: 600 7.5px/1 'Mukta', sans-serif;
+  letter-spacing: .2em;
+  color: rgba(249,226,148,.85);
+}
+
+.mockInterior {
+  width: 132px; height: 190px;
+  border-radius: 12px 3px 3px 12px;
+  background: var(--verde-elevado);
+  padding: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.mockFoto {
+  width: 100%; height: 62px;
+  border-radius: 8px;
+  background: var(--verde-profundo);
+}
+
+.mockLinea {
+  height: 4px;
+  background: rgba(249,226,148,.18);
+  border-radius: 99px;
+  width: 100%;
+}
+
+.mockPag {
+  margin-top: auto;
+  font: 600 7.5px 'Mukta', sans-serif;
+  letter-spacing: .18em;
+  color: rgba(249,226,148,.66);
 }
 
 .downloadBtn {
-  width: 100%;
-  padding: 14px;
-  background: #c4621a;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--burro);
   border: none;
-  border-radius: 4px;
-  color: white;
-  font-family: 'Yanone Kaffeesatz', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font: 700 16px 'Mukta', sans-serif;
+  color: var(--verde);
   cursor: pointer;
+}
+
+.downloadBtn:hover { background: var(--rosso); color: var(--burro); }
+.downloadBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+.busy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--verde-elevado);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.busyHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font: 600 10px 'Mukta', sans-serif;
+  letter-spacing: .18em;
+  color: rgba(249,226,148,.65);
+}
+
+.busyPct { font: 400 18px 'Anton', sans-serif; color: var(--burro); letter-spacing: normal; }
+
+.busyTrack {
+  height: 7px;
+  border-radius: 99px;
+  background: rgba(249,226,148,.14);
+  overflow: hidden;
+}
+
+.busyFill {
+  height: 7px;
+  border-radius: 99px;
+  background: var(--rosso);
+  transition: width .25s ease;
+}
+
+.doneBanner {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition: all 0.2s;
+  gap: 12px;
+  background: var(--rosso);
+  border-radius: 14px;
+  padding: 16px;
 }
 
-.downloadBtn:hover:not(:disabled) {
-  background: #d4721a;
-  box-shadow: 0 4px 16px rgba(196, 98, 26, 0.3);
+.doneDisc {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--burro);
+  display: flex; align-items: center; justify-content: center;
+  flex: none;
 }
 
-.downloadBtn:disabled {
-  background: rgba(196, 98, 26, 0.3);
-  cursor: not-allowed;
-}
+.doneText { flex: 1; font: 700 15px 'Mukta', sans-serif; color: var(--burro); }
 
-.spinner { animation: spin 1s linear infinite; }
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.deNuevo {
+  font: 600 10px 'Mukta', sans-serif;
+  letter-spacing: .14em;
+  color: rgba(249,226,148,.85);
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .empty {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  color: rgba(245, 230, 211, 0.3);
+  font: 400 14px 'Mukta', sans-serif;
+  color: rgba(249,226,148,.6);
   text-align: center;
-  margin: 0;
-}
-
-@media (max-width: 480px) {
-  .wrap { padding: 32px 16px; }
-  .card { padding: 28px 24px; }
-  .title { font-size: 26px; }
 }

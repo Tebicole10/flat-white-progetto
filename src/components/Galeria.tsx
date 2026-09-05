@@ -1,27 +1,29 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Cafe, Visita } from '../types';
 import { calcularPromedioCafe, calcularRatingVisita, formatFecha } from '../utils';
 import { useCafeContext } from '../context/CafeContext';
-import { ChevronDown, Trash2, RefreshCw, Pencil, X } from 'lucide-react';
+import { Icon } from './Icon';
 import styles from './Galeria.module.css';
 
 interface GaleriaProps {
   onRevisitar: (cafe: Cafe) => void;
   onEditarCafe: (cafe: Cafe) => void;
   onEditarVisita: (cafe: Cafe, visita: Visita) => void;
+  cafeAAbrir?: string | null;
+  onAbierto?: () => void;
 }
 
 type Orden = 'fecha' | 'alfa';
 
 const CATS = [
-  { key: 'cafe' as const, label: '☕ Café' },
-  { key: 'comestibles' as const, label: '🥐 Delizie' },
-  { key: 'vajilla' as const, label: '🍽️ Vajilla' },
-  { key: 'ambientacion' as const, label: '🎨 Ambiente' },
-  { key: 'servicio' as const, label: '👥 Servicio' },
+  { key: 'cafe' as const, label: 'CAFÉ' },
+  { key: 'comestibles' as const, label: 'DELIZIE' },
+  { key: 'vajilla' as const, label: 'VAJILLA' },
+  { key: 'ambientacion' as const, label: 'AMBIENTACIÓN' },
+  { key: 'servicio' as const, label: 'SERVICIO' },
 ];
 
-export const Galeria: React.FC<GaleriaProps> = ({ onRevisitar, onEditarCafe, onEditarVisita }) => {
+export const Galeria: React.FC<GaleriaProps> = ({ onRevisitar, onEditarCafe, onEditarVisita, cafeAAbrir, onAbierto }) => {
   const { cafes, deleteCafe } = useCafeContext();
   const [destacadoOpen, setDestacadoOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -29,14 +31,22 @@ export const Galeria: React.FC<GaleriaProps> = ({ onRevisitar, onEditarCafe, onE
   const [search, setSearch] = useState('');
   const [orden, setOrden] = useState<Orden>('fecha');
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [confirmDel, setConfirmDel] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (cafeAAbrir) {
+      setExpandedId(cafeAAbrir);
+      onAbierto?.();
+    }
+  }, [cafeAAbrir, onAbierto]);
 
   const cafesConVisitas = cafes.filter(c => c.visitas.length > 0);
+  const visitCount = cafesConVisitas.reduce((acc, c) => acc + c.visitas.length, 0);
 
   const cafeDestacado = cafesConVisitas.length > 0
     ? [...cafesConVisitas].sort((a, b) => calcularPromedioCafe(b) - calcularPromedioCafe(a))[0]
     : null;
 
-  // El destacado no se repite en la lista de abajo
   const filtered = cafes
     .filter(c => c.id !== cafeDestacado?.id)
     .filter(c => c.nombre.toLowerCase().includes(search.toLowerCase()))
@@ -60,110 +70,117 @@ export const Galeria: React.FC<GaleriaProps> = ({ onRevisitar, onEditarCafe, onE
     return null;
   };
 
+  const toggleCard = (id: string) => {
+    setExpandedId(prev => (prev === id ? null : id));
+    setConfirmDel(null);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirmDel === id) {
+      deleteCafe(id);
+      setConfirmDel(null);
+    } else {
+      setConfirmDel(id);
+    }
+  };
+
   const renderDetalle = (cafe: Cafe) => {
     const visitaActiva = getVisitaActiva(cafe);
     if (!visitaActiva) return null;
     const visitasOrdenadas = [...cafe.visitas].sort((a, b) => b.fecha.localeCompare(a.fecha));
+    const borrando = confirmDel === cafe.id;
 
     return (
       <div className={styles.detalle}>
         {cafe.visitas.length > 1 && (
-          <div className={styles.visitaSelector}>
-            {visitasOrdenadas.map((v, idx) => (
-              <button key={v.id}
-                className={`${styles.visitaBtn} ${visitaActiva.id === v.id ? styles.visitaBtnActive : ''}`}
-                onClick={e => { e.stopPropagation(); setVisitaSeleccionada({ ...visitaSeleccionada, [cafe.id]: v.id }); }}>
-                {formatFecha(v.fecha)}
-                {idx === 0 && <span className={styles.visitaBtnBadge}>última</span>}
-              </button>
-            ))}
+          <div className={styles.bloque}>
+            <span className={styles.miniLabel}>VISITAS</span>
+            <div className={styles.visitTabs}>
+              {visitasOrdenadas.map((v, idx) => {
+                const activa = visitaActiva.id === v.id;
+                return (
+                  <button key={v.id}
+                    className={`${styles.visitTab} ${activa ? styles.visitTabActive : ''}`}
+                    onClick={e => { e.stopPropagation(); setVisitaSeleccionada({ ...visitaSeleccionada, [cafe.id]: v.id }); }}>
+                    {formatFecha(v.fecha).split(' de ').slice(0, 2).join(' ')}
+                    {idx === 0 && <span className={styles.ultimaTag}> · ÚLTIMA</span>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
         {visitaActiva.fotos.length > 0 && (
-          <div className={styles.fotos}>
+          <div className={styles.fotosCarrusel}>
             {visitaActiva.fotos.map((f, i) => (
-              <img
-                key={i}
-                src={f}
-                alt=""
-                className={styles.foto}
-                onClick={e => { e.stopPropagation(); setLightbox(f); }}
-              />
+              <img key={i} src={f} alt="" className={styles.fotoMini}
+                onClick={e => { e.stopPropagation(); setLightbox(f); }} />
             ))}
           </div>
         )}
 
-        <div className={styles.ratingsGrid}>
+        <div className={styles.ratings}>
           {CATS.map(({ key, label }) => {
             const val = visitaActiva.ratings[key];
+            const esCafe = key === 'cafe';
             if (val === null) {
               return (
-                <div key={key} className={styles.ratingRowEmpty}>
-                  <span className={styles.ratingLabel}>{label}</span>
-                  <span className={styles.ratingEmptyTag}>No comimos nada esta visita</span>
+                <div key={key} className={styles.ratingRow}>
+                  <div className={styles.ratingHead}>
+                    <span className={styles.ratingLabel}>{label}</span>
+                    <span className={styles.ratingVal}>NO COMIMOS</span>
+                  </div>
+                  <div className={styles.ratingTrack}><div className={styles.ratingFill} style={{ width: 0 }} /></div>
                 </div>
               );
             }
             return (
               <div key={key} className={styles.ratingRow}>
-                <span className={styles.ratingLabel}>{label}</span>
-                <div className={styles.ratingBar}>
-                  <div className={styles.ratingBarFill} style={{ width: `${val * 10}%` }} />
+                <div className={styles.ratingHead}>
+                  <span className={styles.ratingLabel}>{label}</span>
+                  <span className={styles.ratingVal} style={{ color: esCafe ? 'var(--rosso)' : 'var(--burro)' }}>{val}</span>
                 </div>
-                <span className={styles.ratingVal}>{val}/10</span>
+                <div className={styles.ratingTrack}>
+                  <div className={styles.ratingFill} style={{ width: `${val * 10}%`, background: esCafe ? 'var(--rosso)' : 'var(--burro)' }} />
+                </div>
               </div>
             );
           })}
-          <div className={styles.ratingTotal}>
-            <span>Rating visita</span>
-            <span className={styles.ratingTotalVal}>{calcularRatingVisita(visitaActiva.ratings).toFixed(1)}/10</span>
-          </div>
         </div>
 
-        <div className={styles.infoGrid}>
-          <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Fecha</span>
-            <span className={styles.infoVal}>{formatFecha(visitaActiva.fecha)}</span>
-          </div>
-          {visitaActiva.precio > 0 && (
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Índice Flat White</span>
-              <span className={styles.infoVal}>${visitaActiva.precio.toLocaleString('es-AR')}</span>
-            </div>
-          )}
-          {visitaActiva.comestibles && (
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Comimos</span>
-              <span className={styles.infoVal}>{visitaActiva.comestibles}</span>
-            </div>
-          )}
-          {visitaActiva.invitados.length > 0 && (
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Invitados</span>
-              <span className={styles.infoVal}>{visitaActiva.invitados.join(', ')}</span>
-            </div>
-          )}
+        <div className={styles.total}>
+          <span>TOTAL DE LA VISITA</span>
+          <span className={styles.totalVal}>{calcularRatingVisita(visitaActiva.ratings).toFixed(1)}</span>
+        </div>
+
+        <div className={styles.dataTable}>
+          <div className={styles.dataRow}><span className={styles.dataKey}>FECHA</span><span className={styles.dataVal}>{formatFecha(visitaActiva.fecha)}</span></div>
+          <div className={styles.dataRow}><span className={styles.dataKey}>ÍNDICE FLAT WHITE</span><span className={styles.dataVal}>{visitaActiva.precio > 0 ? `$${visitaActiva.precio.toLocaleString('es-AR')}` : 'Sin cargar'}</span></div>
+          <div className={styles.dataRow}><span className={styles.dataKey}>COMESTIBLES</span><span className={styles.dataVal}>{visitaActiva.comestibles || 'No comimos nada'}</span></div>
           {visitaActiva.notas && (
-            <div className={`${styles.infoItem} ${styles.infoFull}`}>
-              <span className={styles.infoLabel}>Notas</span>
-              <span className={styles.infoVal}>{visitaActiva.notas}</span>
-            </div>
+            <div className={styles.dataRow}><span className={styles.dataKey}>NOTAS</span><span className={styles.dataVal}>{visitaActiva.notas}</span></div>
           )}
         </div>
+
+        {visitaActiva.invitados.length > 0 && (
+          <div className={styles.bloque}>
+            <span className={styles.miniLabel}>INVITADOS</span>
+            <div className={styles.chips}>
+              {visitaActiva.invitados.map((inv, i) => <span key={i} className={styles.chip}>{inv}</span>)}
+            </div>
+          </div>
+        )}
 
         <div className={styles.acciones}>
-          <button className={styles.editarCafeBtn} onClick={e => { e.stopPropagation(); onEditarCafe(cafe); }}>
-            <Pencil size={13} /> Editar café
-          </button>
-          <button className={styles.editarVisitaBtn} onClick={e => { e.stopPropagation(); onEditarVisita(cafe, visitaActiva); }}>
-            <Pencil size={13} /> Editar visita
-          </button>
-          <button className={styles.revisitBtn} onClick={e => { e.stopPropagation(); onRevisitar(cafe); }}>
-            <RefreshCw size={13} /> Revisitar
-          </button>
-          <button className={styles.deleteBtn} onClick={e => { e.stopPropagation(); if (confirm('¿Borrar este café?')) deleteCafe(cafe.id); }}>
-            <Trash2 size={13} />
+          <button className={styles.outlineBtn} onClick={e => { e.stopPropagation(); onEditarCafe(cafe); }}>Editar café</button>
+          <button className={styles.outlineBtn} onClick={e => { e.stopPropagation(); onEditarVisita(cafe, visitaActiva); }}>Editar visita</button>
+          <button className={styles.burroBtn} onClick={e => { e.stopPropagation(); onRevisitar(cafe); }}>Revisitar</button>
+          <button
+            className={borrando ? styles.delBtnConfirm : styles.delBtn}
+            onClick={e => { e.stopPropagation(); handleDelete(cafe.id); }}
+          >
+            {borrando ? '¿Seguro?' : 'Borrar'}
           </button>
         </div>
       </div>
@@ -172,88 +189,79 @@ export const Galeria: React.FC<GaleriaProps> = ({ onRevisitar, onEditarCafe, onE
 
   return (
     <div className={styles.galeria}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Guía</h1>
+        <div className={styles.count}>{cafes.length} CAFÉS<br />{visitCount} VISITAS</div>
+      </div>
 
-      {/* CAFÉ DESTACADO — estado de apertura independiente */}
       {cafeDestacado && (
-        <div className={styles.destacadoWrap}>
-          <div
-            className={styles.destacado}
-            onClick={() => setDestacadoOpen(!destacadoOpen)}
-            style={obtenerFotoPortada(cafeDestacado)
-              ? { backgroundImage: `url(${obtenerFotoPortada(cafeDestacado)})` }
-              : undefined}
-          >
-            <div className={styles.destacadoOverlay} />
-            <div className={styles.destacadoContent}>
-              <span className={styles.destacadoLabel}>✦ Mejor puntuado</span>
-              <h2 className={styles.destacadoNombre}>{cafeDestacado.nombre}</h2>
-              <div className={styles.destacadoMeta}>
-                <span className={styles.destacadoRating}>{calcularPromedioCafe(cafeDestacado).toFixed(1)}/10</span>
-                <span className={styles.destacadoDireccion}>{cafeDestacado.direccion}</span>
-              </div>
+        <div className={styles.px}>
+          <div className={styles.hero} onClick={() => setDestacadoOpen(!destacadoOpen)}
+            style={obtenerFotoPortada(cafeDestacado) ? { backgroundImage: `url(${obtenerFotoPortada(cafeDestacado)})` } : undefined}>
+            <div className={styles.heroGradient} />
+            <div className={styles.heroTop}>
+              <span>DESTACADO</span>
+              <span>{formatFecha([...cafeDestacado.visitas].sort((a, b) => b.fecha.localeCompare(a.fecha))[0].fecha)}</span>
             </div>
-            <ChevronDown size={20} className={`${styles.destacadoChevron} ${destacadoOpen ? styles.chevronOpen : ''}`} />
+            <div className={styles.heroBadge}><Icon name="emoji_events" size={23} color="var(--burro)" /></div>
+            <div className={styles.heroBottom}>
+              <div className={styles.heroInfo}>
+                <div className={styles.heroNombre}>{cafeDestacado.nombre}</div>
+                <div className={styles.heroDireccion}>{cafeDestacado.direccion}</div>
+              </div>
+              <div className={styles.heroScore}>{calcularPromedioCafe(cafeDestacado).toFixed(1)}</div>
+            </div>
           </div>
-          {destacadoOpen && renderDetalle(cafeDestacado)}
+          {destacadoOpen && <div className={styles.cardBody}>{renderDetalle(cafeDestacado)}</div>}
         </div>
       )}
 
-      {/* TOPBAR */}
-      <div className={styles.topbar}>
-        <input type="text" placeholder="Buscar..." value={search}
+      <div className={styles.px} style={{ display: 'flex', gap: 8 }}>
+        <input type="text" placeholder="Buscar por nombre" value={search}
           onChange={e => setSearch(e.target.value)} className={styles.search} />
-        <div className={styles.ordenBtns}>
-          <button className={`${styles.ordenBtn} ${orden === 'fecha' ? styles.active : ''}`} onClick={() => setOrden('fecha')}>Fecha</button>
-          <button className={`${styles.ordenBtn} ${orden === 'alfa' ? styles.active : ''}`} onClick={() => setOrden('alfa')}>A–Z</button>
-        </div>
+        <button className={`${styles.sortBtn} ${orden === 'fecha' ? styles.sortActive : ''}`} onClick={() => setOrden('fecha')}>FECHA</button>
+        <button className={`${styles.sortBtn} ${orden === 'alfa' ? styles.sortActive : ''}`} onClick={() => setOrden('alfa')}>A–Z</button>
       </div>
 
       {filtered.length === 0 && !cafeDestacado ? (
-        <div className={styles.empty}><p>No hay cafeterías aún. ¡Agregá la primera! ☕</p></div>
+        <div className={styles.empty}>
+          <div className={styles.emptyDisc}><Icon name="local_cafe" size={40} color="var(--rosso)" /></div>
+          <div className={styles.emptyTitle}>Todavía no hay<br />ningún café</div>
+          <div className={styles.emptyText}>Tocá el + y cargá el primero. Foto, puntajes y notas.</div>
+        </div>
       ) : (
-        <div className={styles.lista}>
+        <div className={styles.px} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {filtered.map(cafe => {
             const promedio = calcularPromedioCafe(cafe);
             const isOpen = expandedId === cafe.id;
             const fotoPortada = obtenerFotoPortada(cafe);
-
             return (
-              <div key={cafe.id} className={`${styles.card} ${isOpen ? styles.cardOpen : ''}`}>
-                <div
-                  className={styles.cardHeader}
-                  onClick={() => setExpandedId(isOpen ? null : cafe.id)}
-                  style={fotoPortada ? { backgroundImage: `url(${fotoPortada})` } : undefined}
-                >
-                  {fotoPortada && <div className={styles.cardHeaderOverlay} />}
-                  <div className={styles.cardHeaderContent}>
-                    <div className={styles.cardMeta}>
-                      <h3 className={styles.cardNombre}>{cafe.nombre}</h3>
-                      <p className={styles.cardDireccion}>{cafe.direccion}</p>
-                      {cafe.visitas.length >= 2 && (
-                        <span className={styles.badge}>{cafe.visitas.length} visitas</span>
-                      )}
+              <div key={cafe.id} className={styles.card}>
+                <div className={styles.cardHeader} onClick={() => toggleCard(cafe.id)}
+                  style={fotoPortada ? { backgroundImage: `url(${fotoPortada})`, height: isOpen ? 170 : 214 } : { height: isOpen ? 170 : 214 }}>
+                  <div className={styles.cardGradient} />
+                  <div className={styles.cardTop}>
+                    <span>{formatFecha([...cafe.visitas].sort((a, b) => b.fecha.localeCompare(a.fecha))[0]?.fecha || cafe.createdAt)}</span>
+                    {cafe.visitas.length >= 2 && <span>{cafe.visitas.length} VISITAS</span>}
+                  </div>
+                  <div className={styles.cardBottom}>
+                    <div className={styles.cardInfo}>
+                      <div className={styles.cardNombre}>{cafe.nombre}</div>
+                      <div className={styles.cardDireccion}>{cafe.direccion}</div>
                     </div>
-                    <div className={styles.cardRight}>
-                      <span className={styles.promedioNum}>{promedio.toFixed(1)}</span>
-                      <span className={styles.promedioMax}>/10</span>
-                      <ChevronDown size={18} className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`} />
-                    </div>
+                    <div className={styles.cardScore} style={isOpen ? { background: 'var(--rosso)', color: 'var(--burro)' } : undefined}>{promedio.toFixed(1)}</div>
                   </div>
                 </div>
-
-                {isOpen && renderDetalle(cafe)}
+                {isOpen && <div className={styles.cardBody}>{renderDetalle(cafe)}</div>}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* LIGHTBOX */}
       {lightbox && (
         <div className={styles.lightboxOverlay} onClick={() => setLightbox(null)}>
-          <button className={styles.lightboxClose} onClick={() => setLightbox(null)}>
-            <X size={24} />
-          </button>
+          <span className={styles.lightboxClose}>CERRAR ✕</span>
           <img src={lightbox} alt="" className={styles.lightboxImg} onClick={e => e.stopPropagation()} />
         </div>
       )}

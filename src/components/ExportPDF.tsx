@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { useCafeContext } from '../context/CafeContext';
 import { calcularPromedioCafe, calcularPromedioCategoria, calcularPrecioPromedio, formatFecha } from '../utils';
-import { Download, Loader } from 'lucide-react';
+import { Icon } from './Icon';
 import jsPDF from 'jspdf';
 import styles from './ExportPDF.module.css';
+
+interface ExportPDFProps {
+  onCerrar: () => void;
+}
 
 const BG     = [19, 10, 4]    as const;
 const ACCENT = [196, 98, 26]  as const;
@@ -93,14 +97,18 @@ const drawFotos = async (
   }
 };
 
-export const ExportPDF: React.FC = () => {
+export const ExportPDF: React.FC<ExportPDFProps> = ({ onCerrar }) => {
   const { cafes } = useCafeContext();
   const [loading, setLoading] = useState(false);
   const [progreso, setProgreso] = useState('');
+  const [done, setDone] = useState(false);
+  const [pdfPct, setPdfPct] = useState(0);
 
   const generatePDF = async () => {
     if (cafes.length === 0) { alert('No hay cafés para exportar'); return; }
     setLoading(true);
+    setDone(false);
+    setPdfPct(4);
 
     try {
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -120,6 +128,7 @@ export const ExportPDF: React.FC = () => {
 
       // ── ÍNDICE ───────────────────────────────────────────
       setProgreso('Generando indice...');
+      setPdfPct(15);
       pdf.addPage();
       pdf.setFillColor(...BG); pdf.rect(0, 0, W, H, 'F');
       pdf.setFillColor(...ACCENT); pdf.rect(0, 0, 2.5, H, 'F');
@@ -190,7 +199,8 @@ export const ExportPDF: React.FC = () => {
       // ── PÁGINAS POR CAFÉ ─────────────────────────────────
       for (let i = 0; i < cafesAlfa.length; i++) {
         const cafe = cafesAlfa[i];
-        setProgreso(`Cafe ${i + 1} de ${cafesAlfa.length}: ${cafe.nombre}`);
+        setProgreso(`CAFÉ ${i + 1} DE ${cafesAlfa.length}`);
+        setPdfPct(25 + Math.round(((i + 1) / cafesAlfa.length) * 65));
         pdf.addPage();
 
         // Layout alterno: impar = info izq / foto der | par = foto izq / info der
@@ -356,7 +366,8 @@ export const ExportPDF: React.FC = () => {
       }
 
       // ── CONTRAPORTADA ─────────────────────────────────────
-      setProgreso('Terminando...');
+      setProgreso('CERRANDO EL LIBRO');
+      setPdfPct(96);
       pdf.addPage();
       try {
         const b64 = await fetchImageAsDataURL('/pdf-contraportada.jpg');
@@ -367,6 +378,8 @@ export const ExportPDF: React.FC = () => {
 
       const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
       pdf.save(`Progetto-Flat-White-${fecha}.pdf`);
+      setPdfPct(100);
+      setDone(true);
 
     } catch (err) {
       console.error('PDF Error:', err);
@@ -377,31 +390,62 @@ export const ExportPDF: React.FC = () => {
     }
   };
 
+  const paginasTotales = cafes.filter(c => c.visitas.length > 0).length + 3; // portada + indice + 1 por cafe + contraportada
+
   return (
     <div className={styles.wrap}>
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <h2 className={styles.title}>Descargar Guía</h2>
-          <p className={styles.subtitle}>
-            {cafes.length} {cafes.length === 1 ? 'cafetería' : 'cafeterías'} · PDF horizontal
-          </p>
-        </div>
-
-        <button
-          className={styles.downloadBtn}
-          onClick={generatePDF}
-          disabled={loading || cafes.length === 0}
-        >
-          {loading
-            ? <><Loader size={18} className={styles.spinner} /> {progreso || 'Generando...'}</>
-            : <><Download size={18} /> Descargar PDF</>
-          }
-        </button>
-
-        {cafes.length === 0 && (
-          <p className={styles.empty}>Agregá cafés para poder descargar la guía.</p>
-        )}
+      <div className={styles.header}>
+        <h1 className={styles.title}>Descargar<br />la guía</h1>
+        <button className={styles.cerrar} onClick={onCerrar}>CERRAR ✕</button>
       </div>
+
+      <p className={styles.bajada}>
+        {cafes.length} {cafes.length === 1 ? 'cafetería entra' : 'cafeterías entran'} en esta edición.
+        Libro horizontal con portada, índice, contraportada y una página por café con sus fotos, puntajes, notas e invitados.
+      </p>
+
+      <div className={styles.mockRow}>
+        <div className={styles.mockPortada}>
+          <div className={styles.mockDisc}><Icon name="local_cafe" size={22} color="var(--rosso)" /></div>
+          <div className={styles.mockPortadaTitulo}>Progetto<br />Flat<br />White</div>
+          <div className={styles.mockEdicion}>EDICIÓN 2026</div>
+        </div>
+        <div className={styles.mockInterior}>
+          <div className={styles.mockFoto} />
+          <div className={styles.mockLinea} />
+          <div className={styles.mockLinea} style={{ width: '80%' }} />
+          <div className={styles.mockLinea} style={{ width: '60%' }} />
+          <div className={styles.mockPag}>PAG. {Math.ceil(paginasTotales / 2)} / {paginasTotales}</div>
+        </div>
+      </div>
+
+      {!loading && !done && (
+        <button className={styles.downloadBtn} onClick={generatePDF} disabled={cafes.length === 0}>
+          Descargar PDF
+        </button>
+      )}
+
+      {loading && (
+        <div className={styles.busy}>
+          <div className={styles.busyHead}>
+            <span>{progreso || 'GENERANDO'}</span>
+            <span className={styles.busyPct}>{pdfPct}%</span>
+          </div>
+          <div className={styles.busyTrack}><div className={styles.busyFill} style={{ width: `${pdfPct}%` }} /></div>
+        </div>
+      )}
+
+      {done && !loading && (
+        <div className={styles.doneBanner}>
+          <div className={styles.doneDisc}><Icon name="download_done" size={24} color="var(--rosso)" /></div>
+          <span className={styles.doneText}>Listo — {paginasTotales} páginas</span>
+          <button className={styles.deNuevo} onClick={generatePDF}>DE NUEVO</button>
+        </div>
+      )}
+
+      {cafes.length === 0 && (
+        <p className={styles.empty}>Agregá cafés para poder descargar la guía.</p>
+      )}
     </div>
   );
 };

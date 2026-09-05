@@ -1,6 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz:wght@400;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Mukta:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=block');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --verde: #2D3C21;
+  --verde-elevado: #364727;
+  --verde-profundo: #253118;
+  --burro: #F9E294;
+  --rosso: #E23012;
+  --rosa: #F5AFAF;
+}
 
 html, body, #root {
   width: 100%;
@@ -9,8 +19,24 @@ html, body, #root {
 }
 
 body {
-  font-family: 'DM Sans', sans-serif;
-  background: #0f0703;
-  color: #f5e6d3;
+  font-family: 'Mukta', sans-serif;
+  background: var(--verde);
+  color: var(--burro);
   -webkit-font-smoothing: antialiased;
+}
+
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { Icon } from './Icon';
 import styles from './Intro.module.css';
 
 interface IntroProps {
@@ -6,27 +6,35 @@ interface IntroProps {
 }
 
 export const Intro: React.FC<IntroProps> = ({ onPlay }) => {
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  const handlePlay = () => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.35;
-      audioRef.current.play().catch(() => {});
-    }
-    onPlay();
-  };
-
   return (
     <div className={styles.intro}>
-      <audio ref={audioRef} src="/background.mp3" loop preload="auto" />
-      <img src="/intro-bg.png" alt="Progetto Flat White" className={styles.bg} />
-      <div className={styles.overlay} />
-      <button className={styles.playBtn} onClick={handlePlay} aria-label="Entrar">
-        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="32" cy="32" r="31" stroke="rgba(245,230,211,0.5)" strokeWidth="1"/>
-          <polygon points="26,20 46,32 26,44" fill="#f5e6d3"/>
-        </svg>
-      </button>
+      <img src="/intro-bg.png" alt="" className={styles.bg} />
+      <div className={styles.gradient} />
+      <div className={styles.halo} />
+      <div className={styles.content}>
+        <div className={styles.top}>
+          <span>ESTD 2026</span>
+          <span>GUÍA PORTEÑA</span>
+        </div>
+        <div className={styles.hero}>
+          <div className={styles.mark}>
+            <Icon name="local_cafe" size={30} color="var(--rosso)" />
+          </div>
+          <h1 className={styles.title}>
+            Progetto<br /><span>Flat White</span>
+          </h1>
+          <p className={styles.bajada}>
+            Una guía de las cafeterías de Buenos Aires, hecha entre hermanos.
+            Fotos, puntajes, mapa y un torneo para desempatar.
+          </p>
+        </div>
+        <div className={styles.cta}>
+          <button className={styles.playBtn} onClick={onPlay} aria-label="Entrar">
+            <span className={styles.triangle} />
+          </button>
+          <span className={styles.ctaLabel}>TOCÁ PARA<br />ENTRAR</span>
+        </div>
+      </div>
     </div>
   );
 };

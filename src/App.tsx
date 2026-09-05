@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import type { Cafe, Visita, Pendiente } from './types';
 import { CafeProvider } from './context/CafeContext';
 import { Intro } from './components/Intro';
@@ -11,8 +11,8 @@ import { Bracket } from './components/Bracket';
 import { ExportPDF } from './components/ExportPDF';
 import { Sobre } from './components/Sobre';
 import { Pendientes } from './components/Pendientes';
+import { Icon } from './components/Icon';
 import { useCafeContext } from './context/CafeContext';
-import { Plus, Volume2, VolumeX } from 'lucide-react';
 import styles from './App.module.css';
 
 type Pantalla = 'intro' | 'login' | 'app';
@@ -26,21 +26,29 @@ interface FormState {
   pendienteOrigen?: Pendiente;
 }
 
+const TABS: { id: Vista; label: string; icon: string }[] = [
+  { id: 'galeria', label: 'GUÍA', icon: 'menu_book' },
+  { id: 'rankings', label: 'RANKINGS', icon: 'emoji_events' },
+  { id: 'mapa', label: 'MAPA', icon: 'map' },
+  { id: 'pendientes', label: 'PENDIENTES', icon: 'bookmark' },
+];
+
+const MENU_ITEMS: { id: Vista; t: string; meta: string; icon: string }[] = [
+  { id: 'sobre', t: 'Sobre el proyecto', meta: 'MANIFIESTO', icon: 'auto_stories' },
+  { id: 'bracket', t: 'Bracket', meta: 'TORNEO', icon: 'account_tree' },
+  { id: 'descargar', t: 'Descargar guía', meta: 'PDF', icon: 'download' },
+];
+
 function AppContent() {
   const [pantalla, setPantalla] = useState<Pantalla>('intro');
-  const [vista, setVista] = useState<Vista>('sobre');
+  const [vista, setVista] = useState<Vista>('galeria');
   const [form, setForm] = useState<FormState>({ show: false });
-  const [muted, setMuted] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [cafeAAbrir, setCafeAAbrir] = useState<string | null>(null);
   const { loading, deletePendiente } = useCafeContext();
 
-  useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = 0.35;
-  }, []);
-
   const handlePlay = () => {
-    audioRef.current?.play().catch(() => {});
     setTransitioning(true);
     setTimeout(() => { setPantalla('login'); setTransitioning(false); }, 600);
   };
@@ -50,13 +58,8 @@ function AppContent() {
     setTimeout(() => { setPantalla('app'); setTransitioning(false); }, 600);
   };
 
-  const toggleMute = () => {
-    if (audioRef.current) { audioRef.current.muted = !muted; setMuted(!muted); }
-  };
-
   const closeForm = () => setForm({ show: false });
 
-  // Cuando se guarda un café que vino de un pendiente, borramos el pendiente
   const handleFormClose = async (pendienteId?: string) => {
     if (pendienteId) {
       await deletePendiente(pendienteId);
@@ -64,20 +67,19 @@ function AppContent() {
     closeForm();
   };
 
-  const NAV_ITEMS: { id: Vista; label: string }[] = [
-    { id: 'sobre', label: 'Sobre el Proyecto' },
-    { id: 'galeria', label: 'Guía Digital' },
-    { id: 'rankings', label: 'Rankings' },
-    { id: 'mapa', label: 'Mapa' },
-    { id: 'bracket', label: 'Bracket' },
-    { id: 'pendientes', label: 'Pendientes' },
-    { id: 'descargar', label: 'Descargar' },
-  ];
+  const irAGuia = () => { setVista('galeria'); setMenuOpen(false); };
+
+  const irAMenuItem = (id: Vista) => { setVista(id); setMenuOpen(false); };
+
+  const verDetalleEnGuia = (cafeId: string) => {
+    setCafeAAbrir(cafeId);
+    setVista('galeria');
+  };
+
+  const esVistaTab = TABS.some(t => t.id === vista);
 
   return (
     <div className={styles.root}>
-      <audio ref={audioRef} src="/background.mp3" loop />
-
       {pantalla === 'intro' && (
         <div className={`${styles.screen} ${transitioning ? styles.slideDown : ''}`}>
           <Intro onPlay={handlePlay} />
@@ -91,37 +93,18 @@ function AppContent() {
       )}
 
       {pantalla === 'app' && (
-        <div className={`${styles.appWrap} ${transitioning ? styles.fadeIn : ''}`}
-          style={{ backgroundImage: 'url(/app-bg.png)' }}>
-          <div className={styles.appOverlay} />
-
+        <div className={`${styles.appWrap} ${transitioning ? styles.fadeIn : ''}`}>
           <header className={styles.header}>
-            <h1 className={styles.title}>Progetto Flat White</h1>
-            <div className={styles.headerRight}>
-              <button className={styles.muteBtn} onClick={toggleMute}>
-                {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-              </button>
-              <button className={styles.addBtn} onClick={() => setForm({ show: true })}>
-                <Plus size={16} /> Agregar café
-              </button>
+            <div className={styles.mark}>
+              <Icon name="local_cafe" size={19} color="var(--rosso)" />
             </div>
+            <div className={styles.wordmark}>FLAT<span>WHITE</span></div>
+            <button className={styles.menuBtn} onClick={() => setMenuOpen(true)} aria-label="Menú">
+              <span className={styles.menuLine} />
+              <span className={styles.menuLine} />
+              <span className={styles.menuLine} />
+            </button>
           </header>
-
-          <div className={styles.divider}>
-            <div className={styles.dividerLine} />
-            <span className={styles.dividerIcon}>☕</span>
-            <div className={styles.dividerLine} />
-          </div>
-
-          <nav className={styles.nav}>
-            {NAV_ITEMS.map(({ id, label }) => (
-              <button key={id}
-                className={`${styles.navBtn} ${vista === id ? styles.navActive : ''}`}
-                onClick={() => setVista(id)}>
-                {label}
-              </button>
-            ))}
-          </nav>
 
           <main className={styles.main}>
             {loading && (
@@ -133,17 +116,17 @@ function AppContent() {
             )}
             {!loading && (
               <>
-                {vista === 'sobre' && <Sobre />}
                 {vista === 'galeria' && (
                   <Galeria
+                    cafeAAbrir={cafeAAbrir}
+                    onAbierto={() => setCafeAAbrir(null)}
                     onRevisitar={c => setForm({ show: true, cafeARevisitar: c })}
                     onEditarCafe={c => setForm({ show: true, cafeAEditar: c })}
                     onEditarVisita={(c, v) => setForm({ show: true, visitaAEditar: { cafe: c, visita: v } })}
                   />
                 )}
                 {vista === 'rankings' && <Rankings />}
-                {vista === 'mapa' && <Mapa />}
-                {vista === 'bracket' && <Bracket />}
+                {vista === 'mapa' && <Mapa onVerDetalle={verDetalleEnGuia} />}
                 {vista === 'pendientes' && (
                   <Pendientes
                     onVisitar={p => {
@@ -152,10 +135,53 @@ function AppContent() {
                     }}
                   />
                 )}
-                {vista === 'descargar' && <ExportPDF />}
+                {vista === 'sobre' && <Sobre onCerrar={irAGuia} />}
+                {vista === 'bracket' && <Bracket onCerrar={irAGuia} />}
+                {vista === 'descargar' && <ExportPDF onCerrar={irAGuia} />}
               </>
             )}
           </main>
+
+          <nav className={styles.tabbar}>
+            {TABS.map(t => {
+              const active = vista === t.id;
+              return (
+                <button key={t.id}
+                  className={styles.tab}
+                  onClick={() => setVista(t.id)}>
+                  <span className={`${styles.tabDisc} ${active ? styles.tabDiscActive : ''}`}>
+                    <Icon name={t.icon} size={21} color={active ? 'var(--burro)' : 'rgba(249,226,148,.72)'} />
+                  </span>
+                  <span className={styles.tabLabel} style={{ color: active ? 'var(--burro)' : 'rgba(249,226,148,.72)' }}>{t.label}</span>
+                </button>
+              );
+            })}
+            <div className={styles.tabbarFabGap} />
+          </nav>
+
+          {esVistaTab && vista === 'galeria' && (
+            <button className={styles.fab} onClick={() => setForm({ show: true })} aria-label="Agregar café">
+              <span className={styles.fabCross} />
+            </button>
+          )}
+
+          {menuOpen && (
+            <>
+              <div className={styles.backdrop} onClick={() => setMenuOpen(false)} />
+              <div className={styles.sheet}>
+                <div className={styles.sheetHandle} />
+                {MENU_ITEMS.map(m => (
+                  <button key={m.id} className={styles.menuItem} onClick={() => irAMenuItem(m.id)}>
+                    <span className={styles.menuItemDisc}>
+                      <Icon name={m.icon} size={21} color="var(--rosso)" />
+                    </span>
+                    <span className={styles.menuItemTitle}>{m.t}</span>
+                    <span className={styles.menuItemMeta}>{m.meta}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 

@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import type { Cafe, Visita, Ratings, Pendiente } from '../types';
 import { generateId } from '../utils';
 import { useCafeContext } from '../context/CafeContext';
-import { X, Plus, Trash2 } from 'lucide-react';
 import styles from './FormularioCafe.module.css';
 
 interface Props {
@@ -14,21 +13,26 @@ interface Props {
 }
 
 const CATEGORIAS = [
-  { key: 'cafe' as const, label: '☕ Café' },
-  { key: 'comestibles' as const, label: '🥐 Delizie' },
-  { key: 'vajilla' as const, label: '🍽️ Vajilla' },
-  { key: 'ambientacion' as const, label: '🎨 Ambientación' },
-  { key: 'servicio' as const, label: '👥 Servicio' },
+  { key: 'cafe' as const, label: 'Café' },
+  { key: 'comestibles' as const, label: 'Delizie' },
+  { key: 'vajilla' as const, label: 'Vajilla' },
+  { key: 'ambientacion' as const, label: 'Ambientación' },
+  { key: 'servicio' as const, label: 'Servicio' },
 ];
 
-const FOTO_SUGERENCIAS = [
-  'Logo / cartel del café',
-  'Café y comida',
-  'Ambiente',
-  'Los asistentes',
-];
+const FOTO_SUGERENCIAS = 'Sacá: el cartel del lugar, el café con la comida, el ambiente, y los que fueron.';
 
 const defaultRatings: Ratings = { cafe: 5, comestibles: 5, vajilla: 5, ambientacion: 5, servicio: 5 };
+
+const parseGoogleMapsUrl = (url: string): { lat: number; lng: number } | null => {
+  const dataMatch = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  if (dataMatch) return { lat: parseFloat(dataMatch[1]), lng: parseFloat(dataMatch[2]) };
+  const atMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (atMatch) return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) };
+  const qMatch = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (qMatch) return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+  return null;
+};
 
 export const FormularioCafe: React.FC<Props> = ({ cafeAEditar, cafeARevisitar, visitaAEditar, pendienteOrigen, onClose }) => {
   const { addCafe, updateCafe, addVisita, updateVisita } = useCafeContext();
@@ -46,6 +50,7 @@ export const FormularioCafe: React.FC<Props> = ({ cafeAEditar, cafeARevisitar, v
   const [direccion, setDireccion] = useState(cafeBase?.direccion || pendienteOrigen?.direccion || '');
   const [lat, setLat] = useState(cafeBase?.coordenadas.lat.toString() || '');
   const [lng, setLng] = useState(cafeBase?.coordenadas.lng.toString() || '');
+  const [pegarError, setPegarError] = useState(false);
 
   const [fecha, setFecha] = useState(visitaBase?.fecha || today);
   const [ratings, setRatings] = useState<Ratings>(visitaBase?.ratings || defaultRatings);
@@ -67,6 +72,22 @@ export const FormularioCafe: React.FC<Props> = ({ cafeAEditar, cafeARevisitar, v
     });
   };
 
+  const pegarLink = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      const coords = parseGoogleMapsUrl(text);
+      if (coords) {
+        setLat(coords.lat.toString());
+        setLng(coords.lng.toString());
+        setPegarError(false);
+      } else {
+        setPegarError(true);
+      }
+    } catch {
+      setPegarError(true);
+    }
+  };
+
   const agregarInvitado = () => {
     if (invitadoInput.trim()) {
       setInvitados([...invitados, invitadoInput.trim()]);
@@ -74,40 +95,24 @@ export const FormularioCafe: React.FC<Props> = ({ cafeAEditar, cafeARevisitar, v
     }
   };
 
-  const toggleSinComida = () => {
-    setSinComida(!sinComida);
-  };
+  const toggleSinComida = () => setSinComida(!sinComida);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nombre || !direccion) { alert('Completá nombre y dirección'); return; }
 
     if (modoEditar && cafeAEditar) {
-      updateCafe(cafeAEditar.id, {
-        ...cafeAEditar,
-        nombre,
-        direccion,
-        coordenadas: { lat: Number(lat), lng: Number(lng) },
-      });
+      updateCafe(cafeAEditar.id, { ...cafeAEditar, nombre, direccion, coordenadas: { lat: Number(lat), lng: Number(lng) } });
       onClose();
       return;
     }
 
-    const ratingsFinal: Ratings = {
-      ...ratings,
-      comestibles: sinComida ? null : ratings.comestibles,
-    };
+    const ratingsFinal: Ratings = { ...ratings, comestibles: sinComida ? null : ratings.comestibles };
 
     if (modoEditarVisita && visitaAEditar) {
       const updatedVisita: Visita = {
-        ...visitaAEditar.visita,
-        fecha,
-        ratings: ratingsFinal,
-        notas,
-        comestibles: sinComida ? '' : comestibles,
-        precio: Number(precio) || 0,
-        fotos,
-        invitados,
+        ...visitaAEditar.visita, fecha, ratings: ratingsFinal, notas,
+        comestibles: sinComida ? '' : comestibles, precio: Number(precio) || 0, fotos, invitados,
       };
       updateVisita(visitaAEditar.cafe.id, visitaAEditar.visita.id, updatedVisita);
       onClose();
@@ -115,203 +120,186 @@ export const FormularioCafe: React.FC<Props> = ({ cafeAEditar, cafeARevisitar, v
     }
 
     const visita: Visita = {
-      id: generateId(),
-      fecha,
-      ratings: ratingsFinal,
-      notas,
-      comestibles: sinComida ? '' : comestibles,
-      precio: Number(precio) || 0,
-      fotos,
-      invitados,
+      id: generateId(), fecha, ratings: ratingsFinal, notas,
+      comestibles: sinComida ? '' : comestibles, precio: Number(precio) || 0, fotos, invitados,
     };
 
     if (modoRevisitar && cafeARevisitar) {
       addVisita(cafeARevisitar.id, visita);
     } else {
       if (!lat || !lng) { alert('Completá las coordenadas'); return; }
-      addCafe({
-        id: generateId(),
-        nombre,
-        direccion,
-        coordenadas: { lat: Number(lat), lng: Number(lng) },
-        visitas: [visita],
-        createdAt: new Date().toISOString(),
-      });
+      addCafe({ id: generateId(), nombre, direccion, coordenadas: { lat: Number(lat), lng: Number(lng) }, visitas: [visita], createdAt: new Date().toISOString() });
     }
     onClose();
   };
 
-  const titulo = modoEditar ? `Editar: ${nombre}` :
-    modoEditarVisita ? `Editar visita: ${visitaAEditar!.cafe.nombre}` :
-    modoRevisitar ? `Revisitar: ${cafeBase?.nombre}` : 'Agregar café';
+  const titulo = modoEditar ? 'Editar café' :
+    modoEditarVisita ? 'Editar visita' :
+    modoRevisitar ? 'Revisitar' : 'Agregar café';
+
+  const subtitulo = modoEditar ? 'SÓLO DATOS DEL LUGAR' :
+    modoEditarVisita ? 'SÓLO ESTA VISITA' :
+    modoRevisitar ? 'MISMO LUGAR · VISITA NUEVA' : 'CAFÉ NUEVO · PRIMERA VISITA';
+
+  const cta = modoEditar ? 'Guardar cambios' :
+    modoEditarVisita ? 'Guardar cambios' :
+    modoRevisitar ? 'Guardar revisita' : 'Agregar café';
+
+  const showPlace = !modoEditarVisita;
+  const showScores = !modoEditar;
+  const showDetails = !modoEditar;
+  const showPhotos = !modoEditar;
+  const showGuests = !modoEditar;
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <div className={styles.modalHeader}>
-          <h2>{titulo}</h2>
-          <button className={styles.closeBtn} onClick={onClose}><X size={22} /></button>
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.sheet} onClick={e => e.stopPropagation()}>
+        <div className={styles.sheetHeader}>
+          <div>
+            <h2 className={styles.sheetTitle}>{titulo}</h2>
+            <p className={styles.sheetSubtitle}>{subtitulo}</p>
+          </div>
+          <button className={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {!modoEditarVisita && (
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Información</h3>
-              <div className={styles.field}>
-                <label>Nombre</label>
-                <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="ej: Coffee Lab" required />
-              </div>
-              <div className={styles.field}>
-                <label>Dirección</label>
-                <input value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="ej: Defensa 100, San Telmo" required />
-              </div>
-              {!modoRevisitar && (
-                <>
-                  <div className={styles.coordsRow}>
-                    <div className={styles.field}>
-                      <label>Latitud</label>
-                      <input type="number" step="any" value={lat} onChange={e => setLat(e.target.value)} placeholder="-34.6037" />
-                    </div>
-                    <div className={styles.field}>
-                      <label>Longitud</label>
-                      <input type="number" step="any" value={lng} onChange={e => setLng(e.target.value)} placeholder="-58.3816" />
-                    </div>
-                  </div>
-                  <p className={styles.hint}>
-                    Tip: buscá en <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer">Google Maps</a>, click derecho y copiá las coordenadas.
-                  </p>
-                </>
-              )}
-            </div>
-          )}
+        <form onSubmit={handleSubmit} className={styles.form} id="form-cafe">
+          <div className={styles.body}>
 
-          {!modoEditar && (
-            <>
+            {showPlace && (
               <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>Puntuaciones <span className={styles.scale}>(sobre 10)</span></h3>
-                {CATEGORIAS.map(({ key, label }) => {
-                  if (key === 'comestibles' && sinComida) {
-                    return (
-                      <div key={key} className={styles.ratingRowDisabled}>
-                        <span className={styles.ratingLabel}>{label}</span>
-                        <span className={styles.sinComidaTag}>No comimos nada en esta visita</span>
-                        <button type="button" className={styles.undoBtn} onClick={toggleSinComida}>Deshacer</button>
-                      </div>
-                    );
-                  }
-                  return (
-                    <div key={key} className={styles.ratingRow}>
-                      <span className={styles.ratingLabel}>{label}</span>
-                      <div className={styles.numPicker}>
-                        {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                          <button
-                            key={n}
-                            type="button"
-                            className={`${styles.numBtn} ${ratings[key] === n ? styles.numBtnOn : ''} ${(ratings[key] ?? 0) >= n ? styles.numBtnFill : ''}`}
-                            onClick={() => setRatings({ ...ratings, [key]: n })}
-                          >
-                            {n}
-                          </button>
-                        ))}
-                      </div>
-                      <span className={styles.numVal}>{ratings[key]}</span>
-                    </div>
-                  );
-                })}
+                <h3 className={styles.sectionTitle}>INFORMACIÓN DEL LUGAR</h3>
+                <div className={styles.field}>
+                  <label className={styles.fieldLabel}>NOMBRE</label>
+                  <input className={styles.input} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="ej: Coffee Lab" required />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.fieldLabel}>DIRECCIÓN</label>
+                  <input className={styles.input} value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="ej: Defensa 100, San Telmo" required />
+                </div>
 
-                {!sinComida && (
-                  <button type="button" className={styles.sinComidaBtn} onClick={toggleSinComida}>
-                    No comimos nada en esta visita
-                  </button>
+                {!modoRevisitar && (
+                  <div className={styles.ubicacionPanel}>
+                    <span className={styles.fieldLabel}>UBICACIÓN</span>
+                    <button type="button" className={styles.pegarBtn} onClick={pegarLink}>Pegar link de Google Maps</button>
+                    <div className={styles.coordsRow}>
+                      <input className={styles.inputSmall} type="number" step="any" value={lat} onChange={e => setLat(e.target.value)} placeholder="lat" />
+                      <input className={styles.inputSmall} type="number" step="any" value={lng} onChange={e => setLng(e.target.value)} placeholder="long" />
+                    </div>
+                    <p className={styles.hint}>
+                      {pegarError
+                        ? 'No pudimos leer coordenadas de eso. Escribilas a mano abajo.'
+                        : 'Del link sacamos las coordenadas solas. También podés escribirlas a mano.'}
+                    </p>
+                  </div>
                 )}
               </div>
+            )}
 
+            {showScores && (
               <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>Detalles</h3>
-                <div className={styles.field}>
-                  <label>Fecha de visita</label>
-                  <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} max={today} />
+                <h3 className={styles.sectionTitle}>PUNTUACIONES · SOBRE 10</h3>
+                {CATEGORIAS.map(({ key, label }) => (
+                  <div key={key} className={styles.scoreRow} style={{ opacity: key === 'comestibles' && sinComida ? .4 : 1 }}>
+                    <div className={styles.scoreHead}>
+                      <span className={styles.scoreLabel}>{label}</span>
+                      <span className={styles.scoreVal}>{key === 'comestibles' && sinComida ? '—' : ratings[key]}</span>
+                    </div>
+                    <div className={styles.dots}>
+                      {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                        <button key={n} type="button" disabled={key === 'comestibles' && sinComida}
+                          className={`${styles.dot} ${(ratings[key] ?? 0) >= n ? (key === 'cafe' ? styles.dotOnRosso : styles.dotOn) : ''}`}
+                          onClick={() => setRatings({ ...ratings, [key]: n })}>
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <button type="button" className={styles.noFoodToggle} style={sinComida ? { background: 'var(--rosso)' } : undefined} onClick={toggleSinComida}>
+                  <span className={styles.noFoodDot} style={sinComida ? { background: 'var(--burro)' } : undefined} />
+                  <span className={styles.noFoodLabel}>No comimos nada en esta visita</span>
+                  <span className={styles.noFoodAction}>{sinComida ? 'DESHACER' : 'MARCAR'}</span>
+                </button>
+              </div>
+            )}
+
+            {showDetails && (
+              <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>DETALLES</h3>
+                <div className={styles.row2}>
+                  <div className={styles.field}>
+                    <label className={styles.fieldLabel}>FECHA</label>
+                    <input className={styles.input} type="date" value={fecha} onChange={e => setFecha(e.target.value)} max={today} />
+                  </div>
+                  <div className={styles.field}>
+                    <label className={styles.fieldLabel}>ÍNDICE FLAT WHITE</label>
+                    <div className={styles.priceInput}>
+                      <span>$</span>
+                      <input value={precio} onChange={e => setPrecio(e.target.value)} type="number" placeholder="1200" />
+                    </div>
+                  </div>
                 </div>
                 {!sinComida && (
                   <div className={styles.field}>
-                    <label>¿Qué comimos? <span className={styles.opcional}>(opcional)</span></label>
-                    <input value={comestibles} onChange={e => setComestibles(e.target.value)} placeholder="Medialunas, croissant..." />
+                    <label className={styles.fieldLabel}>COMESTIBLES</label>
+                    <input className={styles.input} value={comestibles} onChange={e => setComestibles(e.target.value)} placeholder="Qué comieron (opcional)" />
                   </div>
                 )}
                 <div className={styles.field}>
-                  <label>Índice Flat White <span className={styles.opcional}>(precio del café)</span></label>
-                  <div className={styles.priceRow}>
-                    <span>$</span>
-                    <input type="number" value={precio} onChange={e => setPrecio(e.target.value)} placeholder="1200" />
-                  </div>
-                </div>
-                <div className={styles.field}>
-                  <label>Notas <span className={styles.opcional}>(opcional)</span></label>
-                  <textarea value={notas} onChange={e => setNotas(e.target.value)} rows={3} placeholder="Impresiones, recomendaciones..." />
+                  <label className={styles.fieldLabel}>NOTAS</label>
+                  <textarea className={styles.textarea} value={notas} onChange={e => setNotas(e.target.value)} rows={3} placeholder="Lo que no entra en un número" />
                 </div>
               </div>
+            )}
 
+            {showPhotos && (
               <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>Fotos</h3>
-                <div className={styles.fotoSugerencias}>
-                  <span className={styles.fotoSugerenciasTitulo}>Para la guía descargable se usan las primeras 4 fotos. Sugerencia de orden:</span>
-                  <ol className={styles.fotoSugerenciasList}>
-                    {FOTO_SUGERENCIAS.map((s, i) => (
-                      <li key={i}><span className={styles.fotoSugerenciaNum}>{i + 1}</span> {s}</li>
-                    ))}
-                  </ol>
+                <div className={styles.sectionHeadRow}>
+                  <h3 className={styles.sectionTitle}>FOTOS</h3>
+                  <span className={styles.photoHint}>LAS 4 PRIMERAS VAN AL PDF</span>
                 </div>
-                <button type="button" className={styles.uploadBtn} onClick={() => fileInputRef.current?.click()}>
-                  + Agregar fotos
-                </button>
+                <div className={styles.photoGrid}>
+                  {fotos.map((f, i) => (
+                    <div key={i} className={styles.photoSlot}>
+                      <img src={f} alt="" />
+                      <span className={styles.photoNum} style={i < 4 ? { background: 'var(--burro)', color: 'var(--verde)' } : undefined}>{i + 1}</span>
+                      <button type="button" className={styles.photoDel} onClick={() => setFotos(fotos.filter((_, j) => j !== i))}>✕</button>
+                    </div>
+                  ))}
+                  <button type="button" className={styles.photoAdd} onClick={() => fileInputRef.current?.click()}>+</button>
+                </div>
                 <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleFotos} style={{ display: 'none' }} />
-                {fotos.length > 0 && (
-                  <div className={styles.fotosGrid}>
-                    {fotos.map((f, i) => (
-                      <div key={i} className={styles.fotoItem}>
-                        <img src={f} alt="" />
-                        {i < 4 && <span className={styles.portadaBadge}>{i + 1}</span>}
-                        <button type="button" className={styles.deleteFoto} onClick={() => setFotos(fotos.filter((_, j) => j !== i))}>
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <p className={styles.hint}>{FOTO_SUGERENCIAS}</p>
               </div>
+            )}
 
+            {showGuests && (
               <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>Invitados <span className={styles.opcional}>(opcional)</span></h3>
-                <div className={styles.invRow}>
-                  <input
-                    value={invitadoInput}
+                <h3 className={styles.sectionTitle}>INVITADOS</h3>
+                <div className={styles.guestRow}>
+                  <input className={styles.input} value={invitadoInput}
                     onChange={e => setInvitadoInput(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); agregarInvitado(); } }}
-                    placeholder="Nombre"
-                  />
-                  <button type="button" className={styles.addBtn} onClick={agregarInvitado}><Plus size={16} /></button>
+                    placeholder="Nombre" />
+                  <button type="button" className={styles.guestAddBtn} onClick={agregarInvitado}>Agregar</button>
                 </div>
                 {invitados.length > 0 && (
-                  <div className={styles.tags}>
+                  <div className={styles.chips}>
                     {invitados.map((inv, i) => (
-                      <span key={i} className={styles.tag}>
+                      <span key={i} className={styles.chip}>
                         {inv}
-                        <button type="button" onClick={() => setInvitados(invitados.filter((_, j) => j !== i))}>×</button>
+                        <button type="button" onClick={() => setInvitados(invitados.filter((_, j) => j !== i))}>✕</button>
                       </span>
                     ))}
                   </div>
                 )}
               </div>
-            </>
-          )}
+            )}
+          </div>
 
-          <div className={styles.formFooter}>
+          <div className={styles.footer}>
             <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancelar</button>
-            <button type="submit" className={styles.submitBtn}>
-              {modoEditar ? 'Guardar cambios' :
-               modoEditarVisita ? 'Guardar visita' :
-               modoRevisitar ? 'Guardar revisita' : 'Agregar café'}
-            </button>
+            <button type="submit" className={styles.submitBtn}>{cta}</button>
           </div>
         </form>
       </div>

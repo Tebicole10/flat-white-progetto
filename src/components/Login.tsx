@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from './Icon';
 import styles from './Login.module.css';
 
 interface LoginProps {
@@ -12,7 +13,6 @@ export const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Contraseña: "uno solo" sin mayúscula
     if (password.toLowerCase().trim() === 'uno solo') {
       onSuccess();
     } else {
@@ -26,9 +26,11 @@ export const Login: React.FC<LoginProps> = ({ onSuccess }) => {
 
   return (
     <div className={styles.login}>
-      <img src="/app-bg.png" alt="" className={styles.bg} />
+      <img src="/login-bg.png" alt="" className={styles.bg} />
       <div className={styles.overlay} />
       <div className={`${styles.card} ${shake ? styles.shake : ''}`}>
+        <Icon name="lock" size={22} className={styles.lock} />
+        <p className={styles.label}>LA PISTA</p>
         <p className={styles.question}>¿Cuántos Militos hay?</p>
         <form onSubmit={handleSubmit} className={styles.form}>
           <input
@@ -36,10 +38,11 @@ export const Login: React.FC<LoginProps> = ({ onSuccess }) => {
             value={password}
             onChange={e => setPassword(e.target.value)}
             className={`${styles.input} ${error ? styles.inputError : ''}`}
-            placeholder=""
+            placeholder="· · · · · · · ·"
             autoFocus
           />
-          {error && <p className={styles.error}>Intentá de nuevo...</p>}
+          {error && <p className={styles.error}>Intentá de nuevo…</p>}
+          <button type="submit" className={styles.submitBtn}>Entrar</button>
         </form>
       </div>
     </div>

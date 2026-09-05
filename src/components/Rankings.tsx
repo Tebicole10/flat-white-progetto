@@ -2,23 +2,35 @@ import { useState } from 'react';
 import { useCafeContext } from '../context/CafeContext';
 import { calcularPromedioCafe, calcularPromedioCategoria, calcularPrecioPromedio, calcularRankingInvitados } from '../utils';
 import type { Cafe } from '../types';
+import { Icon } from './Icon';
 import styles from './Rankings.module.css';
 
 type CategoriaKey = 'total' | 'cafe' | 'comestibles' | 'vajilla' | 'ambientacion' | 'servicio' | 'precio' | 'invitados';
 
-const OPCIONES: { key: CategoriaKey; label: string; emoji: string }[] = [
-  { key: 'total', label: 'Total', emoji: '👑' },
-  { key: 'cafe', label: 'Café', emoji: '☕' },
-  { key: 'comestibles', label: 'Delizie', emoji: '🥐' },
-  { key: 'vajilla', label: 'Vajilla', emoji: '🍽️' },
-  { key: 'ambientacion', label: 'Ambiente', emoji: '🎨' },
-  { key: 'servicio', label: 'Servicio', emoji: '👥' },
-  { key: 'precio', label: 'Índice FW', emoji: '💰' },
-  { key: 'invitados', label: 'Compañeros', emoji: '🫂' },
+const OPCIONES: { key: CategoriaKey; label: string; icon: string }[] = [
+  { key: 'total', label: 'Total', icon: 'emoji_events' },
+  { key: 'cafe', label: 'Café', icon: 'local_cafe' },
+  { key: 'comestibles', label: 'Delizie', icon: 'bakery_dining' },
+  { key: 'vajilla', label: 'Vajilla', icon: 'restaurant' },
+  { key: 'ambientacion', label: 'Ambiente', icon: 'palette' },
+  { key: 'servicio', label: 'Servicio', icon: 'room_service' },
+  { key: 'precio', label: 'Índice FW', icon: 'payments' },
+  { key: 'invitados', label: 'Compañeros', icon: 'diversity_3' },
 ];
 
-const MEDALLAS = ['🥇', '🥈', '🥉'];
-const COLORES_MEDALLA = ['#D4AF37', '#A8A9AD', '#CD7F32'];
+const HINTS: Record<CategoriaKey, string> = {
+  total: 'PONDERADO · CAFÉ 30% · DELIZIE 20% · AMBIENTACIÓN 25% · SERVICIO 15% · VAJILLA 10%',
+  cafe: 'PROMEDIO DE ESA CATEGORÍA EN TODAS LAS VISITAS',
+  comestibles: 'PROMEDIO DE ESA CATEGORÍA EN TODAS LAS VISITAS',
+  vajilla: 'PROMEDIO DE ESA CATEGORÍA EN TODAS LAS VISITAS',
+  ambientacion: 'PROMEDIO DE ESA CATEGORÍA EN TODAS LAS VISITAS',
+  servicio: 'PROMEDIO DE ESA CATEGORÍA EN TODAS LAS VISITAS',
+  precio: 'PROMEDIO DE PRECIO · DEL MÁS BARATO AL MÁS CARO',
+  invitados: 'CUÁNTAS VISITAS HIZO CADA UNO',
+};
+
+const medalBg = (idx: number) => idx === 0 ? 'var(--burro)' : idx === 1 ? 'var(--rosso)' : idx === 2 ? 'var(--rosa)' : 'rgba(249,226,148,.12)';
+const medalFg = (idx: number) => idx < 3 ? 'var(--verde)' : 'var(--burro)';
 
 export const Rankings: React.FC = () => {
   const { cafes } = useCafeContext();
@@ -35,11 +47,7 @@ export const Rankings: React.FC = () => {
   };
 
   const ranking = esInvitados ? [] : [...cafes]
-    .filter(c => {
-      if (c.visitas.length === 0) return false;
-      const r = getRating(c);
-      return r !== null;
-    })
+    .filter(c => c.visitas.length > 0 && getRating(c) !== null)
     .sort((a, b) => {
       const ra = getRating(a) ?? Infinity;
       const rb = getRating(b) ?? Infinity;
@@ -50,100 +58,67 @@ export const Rankings: React.FC = () => {
 
   return (
     <div className={styles.rankings}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>Rankings</h2>
-        <div className={styles.selector}>
-          {OPCIONES.map(op => (
-            <button key={op.key}
-              className={`${styles.opBtn} ${categoria === op.key ? styles.active : ''}`}
-              onClick={() => setCategoria(op.key)}>
-              <span>{op.emoji}</span>
-              <span>{op.label}</span>
+      <h1 className={styles.title}>Rankings</h1>
+
+      <div className={styles.carrusel}>
+        {OPCIONES.map(op => {
+          const activa = categoria === op.key;
+          return (
+            <button key={op.key} className={styles.catBtn} style={{ opacity: activa ? 1 : .6 }} onClick={() => setCategoria(op.key)}>
+              <span className={styles.catDisc} style={{ borderColor: activa ? 'var(--rosso)' : 'transparent' }}>
+                <Icon name={op.icon} size={26} color="var(--rosso)" />
+              </span>
+              <span className={styles.catLabel} style={{ color: activa ? 'var(--burro)' : 'rgba(249,226,148,.7)' }}>{op.label}</span>
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      {/* RANKING DE INVITADOS */}
-      {esInvitados && (
-        rankingInvitados.length === 0 ? (
-          <div className={styles.empty}><p>Todavía no agregaste invitados a ninguna visita.</p></div>
-        ) : (
-          <div className={styles.list}>
-            {rankingInvitados.map((inv, idx) => {
-              const esMedalla = idx < 3;
-              return (
-                <div key={inv.nombre}
-                  className={`${styles.item} ${esMedalla ? styles.medalla : ''}`}
-                  style={esMedalla ? { '--medalla-color': COLORES_MEDALLA[idx] } as React.CSSProperties : {}}>
-                  <div className={styles.posicion}>
-                    {esMedalla ? <span className={styles.medallaEmoji}>{MEDALLAS[idx]}</span> : <span className={styles.numero}>{idx + 1}</span>}
-                  </div>
-                  <div className={styles.fotoPlaceholder} style={{ width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(245,230,211,0.05)', fontSize: 16 }}>
-                    🫂
-                  </div>
-                  <div className={styles.info}>
-                    <span className={styles.nombre}>{inv.nombre}</span>
-                  </div>
-                  <div className={styles.ratingBox} style={esMedalla ? { color: COLORES_MEDALLA[idx] } : {}}>
-                    <span className={styles.ratingNum}>{inv.visitas}</span>
-                    <span className={styles.ratingMax}>{inv.visitas === 1 ? 'visita' : 'visitas'}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )
-      )}
+      <p className={styles.hint}>{HINTS[categoria]}</p>
 
-      {/* RANKINGS DE CAFÉS */}
-      {!esInvitados && (
-        ranking.length === 0 ? (
-          <div className={styles.empty}>
-            <p>{esPrecio ? 'Ningún café tiene precio cargado aún.' : 'No hay cafés para rankear aún. ¡Empezá a explorar! ☕'}</p>
+      {esInvitados ? (
+        rankingInvitados.length === 0 ? (
+          <div className={styles.emptyCard}>
+            <div className={styles.emptyDisc}><Icon name="group" size={36} color="var(--rosso)" /></div>
+            <div className={styles.emptyTitle}>Nadie cargó invitados</div>
+            <div className={styles.emptyText}>Sumá invitados a una visita y aparecen acá.</div>
           </div>
         ) : (
           <div className={styles.list}>
-            {ranking.map((cafe, idx) => {
-              const rating = getRating(cafe);
-              const esMedalla = idx < 3;
-              return (
-                <div key={cafe.id}
-                  className={`${styles.item} ${esMedalla ? styles.medalla : ''}`}
-                  style={esMedalla ? { '--medalla-color': COLORES_MEDALLA[idx] } as React.CSSProperties : {}}>
-                  <div className={styles.posicion}>
-                    {esMedalla ? <span className={styles.medallaEmoji}>{MEDALLAS[idx]}</span> : <span className={styles.numero}>{idx + 1}</span>}
-                  </div>
-                  <div className={styles.foto}>
-                    {cafe.visitas[0]?.fotos[0]
-                      ? <img src={cafe.visitas[0].fotos[0]} alt={cafe.nombre} />
-                      : <div className={styles.fotoPlaceholder}>☕</div>}
-                  </div>
-                  <div className={styles.info}>
-                    <span className={styles.nombre}>{cafe.nombre}</span>
-                    <span className={styles.direccion}>{cafe.direccion}</span>
-                    {cafe.visitas.length > 1 && (
-                      <span className={styles.visitas}>{cafe.visitas.length} visitas</span>
-                    )}
-                  </div>
-                  <div className={styles.ratingBox} style={esMedalla ? { color: COLORES_MEDALLA[idx] } : {}}>
-                    {esPrecio ? (
-                      <>
-                        <span className={styles.ratingNum}>${(rating ?? 0).toLocaleString('es-AR')}</span>
-                        {esMedalla && idx === 0 && <span className={styles.mejorLabel}>mejor precio</span>}
-                      </>
-                    ) : (
-                      <>
-                        <span className={styles.ratingNum}>{(rating ?? 0).toFixed(1)}</span>
-                        <span className={styles.ratingMax}>/10</span>
-                      </>
-                    )}
-                  </div>
+            {rankingInvitados.map((inv, idx) => (
+              <div key={inv.nombre} className={styles.row}>
+                <div className={styles.pos} style={{ background: medalBg(idx), color: medalFg(idx) }}>{idx + 1}</div>
+                <div className={styles.rowInfo}>
+                  <div className={styles.rowNombre}>{inv.nombre}</div>
+                  <div className={styles.rowSub}>{inv.visitas} {inv.visitas === 1 ? 'VISITA' : 'VISITAS'}</div>
                 </div>
-              );
-            })}
+                <div className={styles.rowVal}>{inv.visitas}</div>
+              </div>
+            ))}
           </div>
         )
+      ) : ranking.length === 0 ? (
+        <div className={styles.emptyCard}>
+          <div className={styles.emptyDisc}><Icon name="local_cafe" size={36} color="var(--rosso)" /></div>
+          <div className={styles.emptyTitle}>Todavía no hay datos</div>
+          <div className={styles.emptyText}>Cargá visitas con esta categoría puntuada.</div>
+        </div>
+      ) : (
+        <div className={styles.list}>
+          {ranking.map((cafe, idx) => {
+            const val = getRating(cafe);
+            return (
+              <div key={cafe.id} className={styles.row}>
+                <div className={styles.pos} style={{ background: medalBg(idx), color: medalFg(idx) }}>{idx + 1}</div>
+                <div className={styles.rowInfo}>
+                  <div className={styles.rowNombre}>{cafe.nombre}</div>
+                  <div className={styles.rowSub}>{cafe.direccion.split(',').pop()?.trim().toUpperCase()}</div>
+                </div>
+                <div className={styles.rowVal}>{esPrecio ? `$${val?.toLocaleString('es-AR')}` : val?.toFixed(1)}</div>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
