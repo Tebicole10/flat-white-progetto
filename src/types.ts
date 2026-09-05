@@ -24,6 +24,7 @@ export interface Cafe {
   coordenadas: { lat: number; lng: number };
   visitas: Visita[];
   createdAt: string;
+  orden?: number;
 }
 
 export interface Pendiente {

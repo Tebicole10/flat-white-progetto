@@ -76,8 +76,6 @@ function AppContent() {
     setVista('galeria');
   };
 
-  const esVistaTab = TABS.some(t => t.id === vista);
-
   return (
     <div className={styles.root}>
       {pantalla === 'intro' && (
@@ -95,15 +93,17 @@ function AppContent() {
       {pantalla === 'app' && (
         <div className={`${styles.appWrap} ${transitioning ? styles.fadeIn : ''}`}>
           <header className={styles.header}>
-            <div className={styles.mark}>
-              <Icon name="local_cafe" size={19} color="var(--rosso)" />
+            <div className={styles.headerRow}>
+              <div className={styles.mark}>
+                <Icon name="local_cafe" size={18} color="var(--rosso)" />
+              </div>
+              <div className={styles.wordmark}>FLAT<span>WHITE</span></div>
+              <button className={styles.menuBtn} onClick={() => setMenuOpen(true)} aria-label="Menú">
+                <span className={styles.menuLine} />
+                <span className={styles.menuLine} />
+                <span className={styles.menuLine} />
+              </button>
             </div>
-            <div className={styles.wordmark}>FLAT<span>WHITE</span></div>
-            <button className={styles.menuBtn} onClick={() => setMenuOpen(true)} aria-label="Menú">
-              <span className={styles.menuLine} />
-              <span className={styles.menuLine} />
-              <span className={styles.menuLine} />
-            </button>
           </header>
 
           <main className={styles.main}>
@@ -143,23 +143,24 @@ function AppContent() {
           </main>
 
           <nav className={styles.tabbar}>
-            {TABS.map(t => {
-              const active = vista === t.id;
-              return (
-                <button key={t.id}
-                  className={styles.tab}
-                  onClick={() => setVista(t.id)}>
-                  <span className={`${styles.tabDisc} ${active ? styles.tabDiscActive : ''}`}>
-                    <Icon name={t.icon} size={21} color={active ? 'var(--burro)' : 'rgba(249,226,148,.72)'} />
-                  </span>
-                  <span className={styles.tabLabel} style={{ color: active ? 'var(--burro)' : 'rgba(249,226,148,.72)' }}>{t.label}</span>
-                </button>
-              );
-            })}
-            <div className={styles.tabbarFabGap} />
+            <div className={styles.tabbarGrid}>
+              {TABS.map(t => {
+                const active = vista === t.id;
+                return (
+                  <button key={t.id}
+                    className={styles.tab}
+                    onClick={() => setVista(t.id)}>
+                    <span className={`${styles.tabDisc} ${active ? styles.tabDiscActive : ''}`}>
+                      <Icon name={t.icon} size={20} color={active ? 'var(--burro)' : 'rgba(249,226,148,.72)'} />
+                    </span>
+                    <span className={styles.tabLabel} style={{ color: active ? 'var(--burro)' : 'rgba(249,226,148,.72)' }}>{t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </nav>
 
-          {esVistaTab && vista === 'galeria' && (
+          {vista === 'galeria' && (
             <button className={styles.fab} onClick={() => setForm({ show: true })} aria-label="Agregar café">
               <span className={styles.fabCross} />
             </button>

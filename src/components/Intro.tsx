@@ -12,10 +12,6 @@ export const Intro: React.FC<IntroProps> = ({ onPlay }) => {
       <div className={styles.gradient} />
       <div className={styles.halo} />
       <div className={styles.content}>
-        <div className={styles.top}>
-          <span>ESTD 2026</span>
-          <span>GUÍA PORTEÑA</span>
-        </div>
         <div className={styles.hero}>
           <div className={styles.mark}>
             <Icon name="local_cafe" size={30} color="var(--rosso)" />
@@ -23,10 +19,7 @@ export const Intro: React.FC<IntroProps> = ({ onPlay }) => {
           <h1 className={styles.title}>
             Progetto<br /><span>Flat White</span>
           </h1>
-          <p className={styles.bajada}>
-            Una guía de las cafeterías de Buenos Aires, hecha entre hermanos.
-            Fotos, puntajes, mapa y un torneo para desempatar.
-          </p>
+          <p className={styles.bajada}>Navigando su un fiume di caffè</p>
         </div>
         <div className={styles.cta}>
           <button className={styles.playBtn} onClick={onPlay} aria-label="Entrar">

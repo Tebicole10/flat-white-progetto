@@ -1,5 +1,5 @@
 .galeria {
-  padding: 16px 0 130px;
+  padding: 16px 0 var(--scroll-pad);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -30,66 +30,89 @@
   white-space: nowrap;
 }
 
-/* Hero */
-.hero {
+/* Aviso (modo manual) */
+.notice {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(249,226,148,.08);
+  border: 1px solid rgba(249,226,148,.16);
+  font: 400 13px/1.45 'Mukta', sans-serif;
+  color: rgba(249,226,148,.8);
+}
+
+/* Reordenar a mano */
+.manualRow {
   position: relative;
+  height: 88px;
   border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-  height: 230px;
-  background-size: cover;
-  background-position: center;
-  background-color: var(--verde-elevado);
-  transition: transform .2s ease;
+  background: var(--verde-elevado);
+  border: 1.5px solid transparent;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 12px;
+  touch-action: none;
 }
 
-.hero:hover { transform: translateY(-2px); }
-
-.heroGradient {
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(30,40,22,.5) 0%, rgba(30,40,22,0) 38%, rgba(30,40,22,.9) 100%);
+.grip {
+  width: 36px;
+  height: 56px;
+  border-radius: 9px;
+  background: rgba(249,226,148,.14);
+  display: grid;
+  place-items: center;
+  flex: none;
+  touch-action: none;
 }
 
-.heroTop {
-  position: absolute; top: 11px; left: 13px; right: 13px;
-  display: flex; justify-content: space-between;
-  font: 600 9px/1 'Mukta', sans-serif; letter-spacing: .18em; color: rgba(249,226,148,.85);
+.manualFoto {
+  width: 52px;
+  height: 65px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--verde);
+  flex: none;
+  display: block;
 }
 
-.heroBadge {
-  position: absolute; top: 34px; right: 13px;
-  width: 42px; height: 42px; border-radius: 50%;
-  background: var(--rosso);
-  display: flex; align-items: center; justify-content: center;
-}
+.manualInfo { flex: 1; min-width: 0; }
 
-.heroBottom {
-  position: absolute; left: 15px; right: 15px; bottom: 13px;
-  display: flex; align-items: flex-end; gap: 12px;
-}
-
-.heroInfo { flex: 1; min-width: 0; }
-
-.heroNombre {
-  font: 400 31px/.94 'Anton', sans-serif;
+.manualNombre {
+  font: 400 20px/1 'Anton', sans-serif;
   text-transform: uppercase;
   color: var(--burro);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.heroDireccion {
-  font: 600 10px/1.4 'Mukta', sans-serif;
+.manualDireccion {
+  font: 600 9px/1.4 'Mukta', sans-serif;
   letter-spacing: .14em;
-  color: rgba(249,226,148,.7);
-  padding-top: 6px;
+  color: rgba(249,226,148,.66);
+  padding-top: 5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.heroScore {
-  width: 54px; height: 54px; border-radius: 50%;
-  background: var(--burro);
-  display: flex; align-items: center; justify-content: center;
-  font: 400 21px 'Anton', sans-serif; color: var(--verde);
-  flex: none;
+.manualScore { font: 400 18px 'Anton', sans-serif; color: rgba(249,226,148,.85); flex: none; }
+
+.manualArrows { display: flex; flex-direction: column; gap: 5px; flex: none; }
+
+.manualArrows button {
+  width: 30px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(249,226,148,.24);
+  background: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
 }
+
+.manualArrows button:disabled { opacity: .28; cursor: default; }
+.manualArrows button:not(:disabled):hover { border-color: var(--burro); }
 
 /* Search */
 .search {
@@ -107,16 +130,20 @@
 .search::placeholder { color: rgba(249,226,148,.4); }
 
 .sortBtn {
-  height: 44px;
-  padding: 0 13px;
+  flex: 1;
+  height: 40px;
+  padding: 0 10px;
   border-radius: 12px;
   background: rgba(249,226,148,.12);
   color: rgba(249,226,148,.7);
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font: 600 10px 'Mukta', sans-serif;
   letter-spacing: .14em;
   cursor: pointer;
-  flex: none;
 }
 
 .sortActive { background: var(--burro); color: var(--verde); }
@@ -131,9 +158,11 @@
 .cardHeader {
   position: relative;
   cursor: pointer;
+  width: 100%;
   background-size: cover;
-  background-position: center;
-  transition: height .2s ease;
+  background-position: 50% 45%;
+  background-color: var(--verde-elevado);
+  transition: aspect-ratio .2s ease;
 }
 
 .cardGradient {
@@ -155,10 +184,10 @@
 .cardInfo { flex: 1; min-width: 0; }
 
 .cardNombre {
-  font: 400 25px/.96 'Anton', sans-serif;
+  font: 400 30px/.94 'Anton', sans-serif;
   text-transform: uppercase;
   color: var(--burro);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-wrap: pretty;
 }
 
 .cardDireccion {
@@ -209,20 +238,17 @@
 
 .ultimaTag { opacity: .7; }
 
-.fotosCarrusel {
-  display: flex;
+.fotosGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 
-.fotosCarrusel::-webkit-scrollbar { display: none; }
-
 .fotoMini {
-  width: 88px; height: 110px;
+  width: 100%;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
   border-radius: 10px;
-  flex: none;
   cursor: pointer;
   display: block;
 }
@@ -402,13 +428,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: calc(var(--safe-top) + 16px) 20px calc(var(--safe-bottom) + 16px);
+  box-sizing: border-box;
   cursor: pointer;
 }
 
 .lightboxImg { max-width: 100%; max-height: 100%; border-radius: 12px; display: block; }
 
 .lightboxClose {
-  position: absolute; top: 44px; right: 20px;
+  position: absolute; top: calc(var(--safe-top) + 8px); right: 20px;
   font: 600 10px 'Mukta', sans-serif; letter-spacing: .14em; color: var(--burro);
 }

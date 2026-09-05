@@ -82,7 +82,7 @@ export const Mapa: React.FC<MapaProps> = ({ onVerDetalle }) => {
   return (
     <div className={styles.mapaWrap}>
       <div className={styles.label}>
-        <span>MAPA</span>
+        <span>BUENOS AIRES · CABA</span>
         <span>{cafesConVisitas.length} {cafesConVisitas.length === 1 ? 'PIN' : 'PINES'}</span>
       </div>
       <div ref={containerRef} className={styles.mapa} />

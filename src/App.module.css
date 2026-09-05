@@ -39,12 +39,17 @@
 /* Header */
 .header {
   flex: none;
-  height: 86px;
-  padding: 38px 16px 0;
+  padding-top: var(--safe-top);
+  border-bottom: 1px solid rgba(249,226,148,.14);
+  box-sizing: border-box;
+}
+
+.headerRow {
+  height: 52px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   gap: 10px;
-  border-bottom: 1px solid rgba(249,226,148,.14);
   box-sizing: border-box;
 }
 
@@ -53,10 +58,10 @@
   height: 31px;
   border-radius: 50%;
   background: var(--burro);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   flex: none;
+  box-sizing: border-box;
 }
 
 .wordmark {
@@ -64,6 +69,7 @@
   text-transform: uppercase;
   color: var(--burro);
   flex: 1;
+  padding-top: 2px;
 }
 
 .wordmark span { color: var(--rosso); }
@@ -108,22 +114,28 @@
 /* Tab bar */
 .tabbar {
   flex: none;
-  height: 84px;
+  height: var(--tab-bar-h);
   background: rgba(45,60,33,.96);
   backdrop-filter: blur(12px);
   border-top: 1px solid rgba(249,226,148,.16);
-  display: flex;
-  align-items: flex-start;
-  padding: 12px 4px 0;
   z-index: 6;
+  box-sizing: border-box;
+}
+
+.tabbarGrid {
+  height: 56px;
+  padding: 0 4px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  box-sizing: border-box;
 }
 
 .tab {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
+  gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
@@ -131,14 +143,14 @@
 }
 
 .tabDisc {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 2px solid transparent;
   background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
 }
 
 .tabDiscActive {
@@ -151,21 +163,18 @@
   letter-spacing: .12em;
 }
 
-.tabbarFabGap { width: 56px; flex: none; }
-
 /* FAB */
 .fab {
   position: absolute;
   right: 16px;
-  bottom: 98px;
+  bottom: var(--fab-bottom);
   width: 62px;
   height: 62px;
   border-radius: 50%;
   background: var(--rosso);
   border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   cursor: pointer;
   box-shadow: 0 12px 28px rgba(226,48,18,.45);
   z-index: 7;
@@ -200,11 +209,12 @@
   z-index: 11;
   background: var(--verde-elevado);
   border-radius: 22px 22px 0 0;
-  padding: 16px 16px 26px;
+  padding: 16px 16px calc(26px + var(--safe-bottom));
   display: flex;
   flex-direction: column;
   gap: 4px;
   box-shadow: 0 -20px 50px rgba(0,0,0,.45);
+  box-sizing: border-box;
 }
 
 .sheetHandle {
@@ -236,10 +246,10 @@
   height: 38px;
   border-radius: 50%;
   background: var(--burro);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   flex: none;
+  box-sizing: border-box;
 }
 
 .menuItemTitle {

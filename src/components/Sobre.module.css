@@ -1,8 +1,9 @@
 .sobre {
-  padding: 16px 16px 130px;
+  padding: 16px 22px var(--scroll-pad);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
+  box-sizing: border-box;
 }
 
 .header { display: flex; align-items: flex-start; justify-content: space-between; }

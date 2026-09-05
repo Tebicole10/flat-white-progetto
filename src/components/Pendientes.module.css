@@ -1,5 +1,5 @@
 .pendientes {
-  padding: 16px 16px 130px;
+  padding: 16px 16px var(--scroll-pad);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -151,7 +151,8 @@
   z-index: 21;
   background: var(--verde-elevado);
   border-radius: 22px 22px 0 0;
-  padding: 18px 16px 24px;
+  padding: 18px 16px calc(24px + var(--safe-bottom));
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 14px;

@@ -39,6 +39,7 @@ interface CafeContextType {
   updatePendiente: (id: string, p: Pendiente) => Promise<void>;
   deletePendiente: (id: string) => Promise<void>;
   convertirPendiente: (id: string) => Pendiente | null;
+  reordenarCafes: (idsEnOrden: string[]) => Promise<void>;
 }
 
 const CafeContext = createContext<CafeContextType | undefined>(undefined);
@@ -50,7 +51,7 @@ const fotosCol = collection(db, 'fotos');
 
 const nuevoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
 
-type CafeRow = { id: string; nombre: string; direccion: string; lat: number; lng: number; createdAt: string };
+type CafeRow = { id: string; nombre: string; direccion: string; lat: number; lng: number; createdAt: string; orden?: number };
 type VisitaRow = {
   id: string; cafeId: string; fecha: string; ratings: Visita['ratings'];
   notas: string; comestibles: string; precio: number; invitados: string[];
@@ -127,6 +128,7 @@ export const CafeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         direccion: row.direccion,
         coordenadas: { lat: row.lat, lng: row.lng },
         createdAt: row.createdAt,
+        orden: row.orden,
         visitas: visitasRaw
           .filter(v => v.cafeId === row.id)
           .map<Visita>(v => ({
@@ -266,13 +268,19 @@ export const CafeProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return pendientes.find(p => p.id === id) || null;
   };
 
+  const reordenarCafes = async (idsEnOrden: string[]) => {
+    const batch = writeBatch(db);
+    idsEnOrden.forEach((id, idx) => batch.update(doc(cafesCol, id), { orden: idx }));
+    await batch.commit();
+  };
+
   return (
     <CafeContext.Provider value={{
       cafes, pendientes, loading,
       addCafe, updateCafe, deleteCafe,
       addVisita, updateVisita, deleteVisita,
       addPendiente, updatePendiente, deletePendiente,
-      convertirPendiente,
+      convertirPendiente, reordenarCafes,
     }}>
       {children}
     </CafeContext.Provider>

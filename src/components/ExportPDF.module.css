@@ -1,5 +1,5 @@
 .wrap {
-  padding: 16px 16px 130px;
+  padding: 16px 16px var(--scroll-pad);
   display: flex;
   flex-direction: column;
   gap: 18px;
