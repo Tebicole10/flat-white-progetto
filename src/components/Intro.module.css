@@ -65,6 +65,7 @@
   width: 30px;
   height: auto;
   display: block;
+  transform: translateX(1.5px);
 }
 
 .title {
