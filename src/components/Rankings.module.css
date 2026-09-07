@@ -72,16 +72,17 @@
   padding: 0 16px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  background: rgba(249,226,148,.13);
 }
 
 .row {
   display: flex;
   align-items: center;
   gap: 13px;
-  background: var(--verde);
   padding: 13px 2px;
+}
+
+.row + .row {
+  border-top: 1px solid rgba(249,226,148,.13);
 }
 
 .pos {
