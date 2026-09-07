@@ -6,7 +6,7 @@
 }
 
 .screen {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 10;
 }
@@ -66,7 +66,7 @@
   width: 17px;
   height: auto;
   display: block;
-  transform: translateX(1px);
+  transform: translateX(2px);
 }
 
 .wordmark {
@@ -128,10 +128,11 @@
 }
 
 .tabbarGrid {
-  height: 68px;
-  padding: 8px 4px 0;
+  height: 100%;
+  padding: 8px 4px var(--safe-bottom);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  align-content: start;
   box-sizing: border-box;
 }
 
